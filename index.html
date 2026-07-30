@@ -204,6 +204,39 @@
   .appear-line{font-size:11.5px;font-weight:700;margin-top:10px;padding:7px 10px;border-radius:10px;background:#fff;display:flex;align-items:center;gap:6px;}
   .appear-line.live{color:var(--green-deep);}
   .appear-line.rest{color:var(--ink-soft);}
+  /* 使用者分級 · 身分列與私密面板 */
+  .rolebar{display:flex;align-items:center;gap:8px;margin:14px 16px 0;padding:9px 12px;border:1px solid var(--line);border-radius:13px;background:#fff;cursor:pointer;font-size:12px;box-shadow:var(--shadow-sm);}
+  .rolebar .ricon{font-size:16px;}
+  .rolebar .rmain{flex:1;min-width:0;}
+  .rolebar .rmain b{font-weight:800;}
+  .rolebar .rmain .rd{font-size:10.5px;color:var(--ink-soft);margin-top:1px;}
+  .rolebar .rswap{font-size:11px;font-weight:800;color:var(--green-deep);flex:0 0 auto;}
+  #rolePanel{padding:0 16px;}
+  .pcard{border-radius:16px;padding:14px;margin-top:12px;box-shadow:var(--shadow-sm);border:1px solid var(--line);background:var(--paper);}
+  .pcard .ph4{font-size:12.5px;font-weight:800;display:flex;align-items:center;gap:7px;margin-bottom:8px;}
+  .pcard .prow{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12px;}
+  .pcard .prow:last-child{border-bottom:none;}
+  .pcard .prow .pk{flex:0 0 22px;font-size:15px;text-align:center;}
+  .pcard .prow .pv{flex:1;line-height:1.5;}
+  .pcard .prow .pv b{font-weight:800;}
+  .pcard .prow .pv span{color:var(--ink-soft);font-size:10.5px;}
+  .pcard.priv{background:linear-gradient(160deg,#fbf6ea,#f4ede0);border-color:#ecdcc0;}
+  .pcard.tomb{background:linear-gradient(160deg,#eef3f6,#e7eef1);border-color:#d3e0e6;}
+  .pcard.preneed{background:linear-gradient(160deg,#eef3e8,#e6efdd);border-color:#d5e3c9;}
+  .pcard.honor{background:linear-gradient(150deg,#3d362e,#5a4f41);border:none;color:#fff;}
+  .pcard.honor .ph4,.pcard.honor .prow .pv{color:#fff;}
+  .pcard.honor .prow{border-color:rgba(255,255,255,.18);}
+  .pcard.honor .prow .pv span{color:rgba(255,255,255,.7);}
+  .pbtn{width:100%;margin-top:10px;border:none;border-radius:12px;padding:11px;font-size:12.5px;font-weight:800;cursor:pointer;background:var(--ink);color:#fff;}
+  .locknote{display:flex;gap:9px;align-items:center;background:#f4eee2;border:1px dashed var(--line);border-radius:14px;padding:12px;margin-top:12px;font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+  .locknote .li{font-size:20px;}
+  /* role sheet options */
+  .roleopt{display:flex;gap:11px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:9px;cursor:pointer;background:#fff;}
+  .roleopt.sel{border-color:var(--green);background:#eef3e8;}
+  .roleopt .oi{font-size:22px;flex:0 0 auto;}
+  .roleopt .ot b{font-size:13px;font-weight:800;}
+  .roleopt .ot .otag{font-size:10px;font-weight:800;color:var(--green-deep);background:#e7efdf;padding:1px 7px;border-radius:20px;margin-left:6px;}
+  .roleopt .ot .od{font-size:11px;color:var(--ink-soft);margin-top:3px;line-height:1.5;}
 
   /* ===== COLLECT ===== */
   .progress-hero{background:linear-gradient(150deg,#5f7d55,#7fa06f);color:#fff;border-radius:20px;padding:18px;margin:4px 0 8px;box-shadow:var(--shadow);}
@@ -365,6 +398,8 @@
         <div class="metric"><div class="n" id="mMet">0</div><div class="l">👣 遇見的人</div></div>
         <div class="metric"><div class="n" id="mSave">0</div><div class="l">🔖 被收藏</div></div>
       </div>
+      <div class="rolebar" id="roleBar" onclick="openRoleSheet()"></div>
+      <div id="rolePanel"></div>
       <div class="storybody">
         <div class="mode-banner" id="modeBanner">📖 真實生命故事 · 由主人親自提供</div>
         <h4 id="storyH4">📖 牠與主人的故事</h4>
@@ -637,7 +672,18 @@ const LOCKED={
 const SKEY='pmm_v1';
 let ST=(()=>{try{return JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){return{}}})();
 ['flowers','saves','mets','guardians','unlocked'].forEach(k=>ST[k]=ST[k]||{});
+if(!ST.role)ST.role='B';
 function persist(){try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}}
+
+/* ---------- 使用者分級（對「這一隻寵物」的私密陪伴差異，非帳號等級） ---------- */
+const ROLES={
+  A1:{icon:"🏛️",name:"安厝家人",tag:"摯親 · 塔位",desc:"真正的主人，且在念念會館租有塔位",owner:true,priv:true,tomb:true},
+  A2:{icon:"💛",name:"摯親家人",tag:"摯親",desc:"真正的主人（未租塔位）",owner:true,priv:true},
+  A3:{icon:"🌱",name:"生前守候",tag:"摯親 · 生前",desc:"真正的主人，簽有生前契約，寵物仍在世",owner:true,priv:true,preneed:true},
+  B :{icon:"🤍",name:"守護者",tag:"動物摯友",desc:"沒有這隻寵物，因喜愛而來陪伴",owner:false},
+  C :{icon:"🎖️",name:"榮譽夥伴",tag:"公共服務",desc:"機關的公共服務動物（警犬／導盲犬…）",inst:true}
+};
+const ROLE_ORDER=["A1","A2","A3","B","C"];
 function resetProgress(){if(confirm('清除你在這個 demo 的所有互動與解鎖紀錄？')){localStorage.removeItem(SKEY);location.reload();}}
 
 /* 地圖上出現的三隻主角 + 收藏冊裡「先前已遇見」的寵物 */
@@ -693,6 +739,56 @@ function setAppearInfo(id){const p=PETS[id],st=apStatus(p),el=document.getElemen
   el.textContent=(st.active?'🟢 現在出沒中':'💤 現在不在這裡')+' · 通常在 '+apRange(p)+' 出沒';
 }
 
+/* ---------- 使用者分級 · 私密陪伴視圖 ---------- */
+function renderRoleView(id){
+  const r=ROLES[ST.role];
+  $('roleBar').innerHTML=`<span class="ricon">${r.icon}</span>
+    <div class="rmain"><b>以「${r.name}」身分查看</b><div class="rd">${r.desc}</div></div>
+    <span class="rswap">切換 ▾</span>`;
+  let h='';
+  if(r.owner||r.preneed){
+    h+=`<div class="pcard priv"><div class="ph4">🔒 私密陪伴（僅摯親可見）</div>
+      <div class="prow"><div class="pk">📔</div><div class="pv"><b>完整私密故事・主人日記</b><br><span>寫給自己與家人、不公開的那一面</span></div></div>
+      <div class="prow"><div class="pk">🖼️</div><div class="pv"><b>私人相簿・影片</b> <span>· 24 張照片 / 3 支影片</span></div></div>
+      <div class="prow"><div class="pk">👣</div><div class="pv"><b>來訪名冊（詳細）</b><br><span>誰來過、誰送了花，一一為你留著</span></div></div>
+      <div class="prow"><div class="pk">✏️</div><div class="pv"><b>編輯故事與公開範圍</b> <span>· 私人／家族／匿名公開／公開</span></div></div>
+      <button class="pbtn" onclick="toast('（Demo）開啟編輯')">編輯這一頁記憶</button></div>`;
+  }
+  if(r.tomb){
+    h+=`<div class="pcard tomb"><div class="ph4">🏛️ 塔位專屬服務（安厝家人）</div>
+      <div class="prow"><div class="pk">📱</div><div class="pv"><b>現場連動</b><br><span>塔位 QR 掃碼開頁・到現場才解鎖的私密留言與影像・實體獻花↔數位連動</span></div></div>
+      <div class="prow"><div class="pk">🎞️</div><div class="pv"><b>年度紀念內容</b><br><span>忌日／生日自動生成紀念短片・每年專人協助更新一次故事</span></div></div>
+      <div class="prow"><div class="pk">✨</div><div class="pv"><b>IP／兒童改編優先</b><br><span>優先進入 YouTube 內容池與兒童故事、角色圖優先產製</span></div></div></div>`;
+  }
+  if(r.preneed){
+    h+=`<div class="pcard preneed"><div class="ph4">🌱 生前守候（寵物仍在世）</div>
+      <div class="prow"><div class="pk">🔏</div><div class="pv"><b>私密建檔中・尚未公開上地圖</b><br><span>先為還在身邊的牠慢慢建立檔案，只有你看得到</span></div></div>
+      <div class="prow"><div class="pk">🎂</div><div class="pv"><b>生日／相伴週年紀念</b> <span>· 陪伴每一個現在</span></div></div>
+      <div class="prow"><div class="pk">🤝</div><div class="pv"><b>生前契約已簽</b><br><span>時候到了，可一鍵從私密建檔轉為公開紀念</span></div></div></div>`;
+  }
+  if(r.inst){
+    h+=`<div class="pcard honor"><div class="ph4">🎖️ 榮譽夥伴（公共服務動物）</div>
+      <div class="prow"><div class="pk">🏅</div><div class="pv"><b>公開榮譽頁</b><br><span>服役紀錄・退役／殉職紀念，讓大眾一起記得</span></div></div>
+      <div class="prow"><div class="pk">🧸</div><div class="pv"><b>IP 化與生命教育</b><br><span>做成角色與兒童內容，適合公益故事</span></div></div>
+      <div class="prow"><div class="pk">🕊️</div><div class="pv"><b>協助料理後事</b> <span>· 由機關授權，平台協辦</span></div></div></div>`;
+  }
+  if(!r.owner&&!r.preneed&&!r.inst){
+    h+=`<div class="locknote"><span class="li">🤍</span><div>你以<b>守護者</b>身分陪伴這隻寵物：可以送花、收藏、記錄遇見，並成為牠的守護者。<br>完整私密故事與相簿，只保留給牠真正的家人。</div></div>`;
+  }
+  $('rolePanel').innerHTML=h;
+}
+function openRoleSheet(){
+  $('sheet').innerHTML=`<div class="grip"></div>
+    <h3>以哪種身分查看這隻寵物？</h3>
+    <div class="stipe">同一個人，對不同寵物可以是不同身分</div>
+    ${ROLE_ORDER.map(k=>{const r=ROLES[k];return `<div class="roleopt ${ST.role===k?'sel':''}" onclick="setRole('${k}')">
+      <div class="oi">${r.icon}</div><div class="ot"><b>${r.name}</b><span class="otag">${r.tag}</span><div class="od">${r.desc}</div></div></div>`;}).join('')}
+    <div class="fine">這是「以此身分查看」的示意；實際上級別是綁在你和某一隻寵物的關係上（見《使用者分級規格》）。</div>`;
+  $('sheetMask').classList.add('show');
+}
+function setRole(k){ST.role=k;persist();$('sheetMask').classList.remove('show');if(cur)renderRoleView(cur);
+  toast('已切換為「'+ROLES[k].name+'」身分');}
+
 /* ---------- story ---------- */
 let cur=null, mode='real';
 const $=id=>document.getElementById(id);
@@ -714,7 +810,7 @@ function openStory(id){
   $('actSave').classList.toggle('done',!!ST.saves[id]);
   $('actMet').classList.toggle('done',!!ST.mets[id]);
   $('gName').textContent=p.name; updateGuardianUI(id,p);
-  setAppearInfo(id);
+  setAppearInfo(id); renderRoleView(id);
   $('headTitle').textContent=p.name+" 的故事";
   $('headSub').textContent="真實生命 · 數位記憶";
   go('story');
