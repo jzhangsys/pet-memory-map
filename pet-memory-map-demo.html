@@ -143,6 +143,47 @@
   .act.save.done .lb{color:#a5741a;}
   .act.met.done{background:#e3eddd;border-color:var(--green);}
   .act.met.done .lb{color:var(--green-deep);}
+  /* story deepening */
+  .modewrap{position:absolute;top:14px;right:14px;z-index:2;display:flex;background:rgba(255,255,255,.9);border-radius:16px;padding:3px;box-shadow:var(--shadow-sm);}
+  .mchip{font-size:10.5px;font-weight:800;padding:5px 9px;border-radius:13px;color:var(--ink-soft);cursor:pointer;}
+  .mchip.on{background:var(--green-deep);color:#fff;}
+  .mode-banner{font-size:11px;font-weight:700;color:var(--green-deep);background:#eef3e8;border:1px solid #d8e3cd;border-radius:11px;padding:8px 11px;margin-top:14px;line-height:1.5;}
+  .mode-banner.kid{color:#a5741a;background:var(--gold-soft);border-color:var(--gold);}
+  .timeline{border-left:2px solid var(--line);margin:4px 0 4px 6px;padding-left:2px;}
+  .timeline .ti{position:relative;padding:0 0 14px 18px;}
+  .timeline .ti::before{content:"";position:absolute;left:-7px;top:2px;width:11px;height:11px;border-radius:50%;background:var(--gold);border:2px solid var(--paper);}
+  .timeline .ti:last-child{padding-bottom:2px;}
+  .timeline .ti .yr{font-size:11px;font-weight:800;color:var(--green-deep);}
+  .timeline .ti .tx{font-size:12.5px;color:#4b4339;margin-top:2px;line-height:1.6;}
+  .guardian-card{display:flex;gap:12px;align-items:center;background:linear-gradient(150deg,#fbf6ea,#f3ede0);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:18px;box-shadow:var(--shadow-sm);}
+  .guardian-card .gtext{flex:1;display:flex;flex-direction:column;gap:3px;}
+  .guardian-card .gtext b{font-size:13px;}
+  .guardian-card .gsub{font-size:11px;font-weight:700;color:var(--gold);}
+  .guardian-card .gdesc{font-size:10.5px;color:var(--ink-soft);line-height:1.5;}
+  .gbtn{flex:0 0 auto;background:var(--ink);color:#fff;border:none;border-radius:13px;padding:11px 14px;font-size:12px;font-weight:800;cursor:pointer;align-self:stretch;}
+  .gbtn.on{background:var(--gold);color:#5a4413;}
+  /* bottom sheet (proximity unlock) */
+  .sheet-mask{position:absolute;inset:0;background:rgba(40,33,24,.5);z-index:70;display:none;align-items:flex-end;}
+  .sheet-mask.show{display:flex;}
+  .sheet{width:100%;background:var(--paper);border-radius:24px 24px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.25);transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);}
+  .sheet-mask.show .sheet{transform:translateY(0);}
+  .sheet .grip{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 14px;}
+  .sheet .lockphoto{width:96px;height:96px;border-radius:50%;overflow:hidden;margin:0 auto 12px;border:3px solid #cbbfa6;position:relative;}
+  .sheet .lockphoto img{width:100%;height:100%;object-fit:cover;filter:grayscale(1) brightness(.85) blur(2px);}
+  .sheet .lockphoto .lk{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:26px;background:rgba(60,54,46,.35);}
+  .sheet h3{margin:0;text-align:center;font-size:17px;font-weight:900;}
+  .sheet .stipe{text-align:center;font-size:12px;color:var(--ink-soft);margin:4px 0 14px;}
+  .sheet .distbar{height:8px;border-radius:8px;background:var(--line);overflow:hidden;margin:0 0 6px;}
+  .sheet .distbar i{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--gold),var(--green));border-radius:8px;transition:width .1s linear;}
+  .sheet .distnum{text-align:center;font-size:12px;font-weight:800;color:var(--green-deep);margin-bottom:14px;}
+  .sheet .walkbtn{width:100%;background:var(--green-deep);color:#fff;border:none;border-radius:15px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;}
+  .sheet .walkbtn:disabled{opacity:.6;}
+  .sheet .fine{font-size:10.5px;color:var(--ink-soft);text-align:center;margin-top:10px;line-height:1.6;}
+  /* collection badge */
+  .badge-won{display:flex;gap:11px;align-items:center;background:linear-gradient(150deg,#5f7d55,#7fa06f);color:#fff;border-radius:16px;padding:13px 15px;margin-bottom:12px;box-shadow:var(--shadow);}
+  .badge-won .bi{font-size:30px;}
+  .badge-won .bt b{font-size:13.5px;font-weight:900;}
+  .badge-won .bt div{font-size:11px;opacity:.9;margin-top:2px;}
 
   /* ===== COLLECT ===== */
   .progress-hero{background:linear-gradient(150deg,#5f7d55,#7fa06f);color:#fff;border-radius:20px;padding:18px;margin:4px 0 8px;box-shadow:var(--shadow);}
@@ -282,7 +323,10 @@
       <div class="story-hero">
         <div class="photo ph" id="storyPhoto"></div>
         <div class="grad"></div>
-        <div class="charchip">📷 <span>真實照片 · 已建數位角色</span></div>
+        <div class="modewrap" id="modeToggle">
+          <span class="mchip on" id="mReal" onclick="setMode('real')">📖 真實故事</span>
+          <span class="mchip" id="mKid" onclick="setMode('kid')">🧸 兒童版</span>
+        </div>
         <div class="htext"><div class="nm" id="storyName">—</div><div class="sub" id="storySub">—</div></div>
       </div>
       <div class="metrics">
@@ -291,7 +335,8 @@
         <div class="metric"><div class="n" id="mSave">0</div><div class="l">🔖 被收藏</div></div>
       </div>
       <div class="storybody">
-        <h4>📖 牠與主人的故事</h4>
+        <div class="mode-banner" id="modeBanner">📖 真實生命故事 · 由主人親自提供</div>
+        <h4 id="storyH4">📖 牠與主人的故事</h4>
         <p id="storyText">—</p>
         <div class="quote" id="storyQuote">—</div>
         <h4>🐾 牠是這樣的孩子</h4>
@@ -300,6 +345,8 @@
           <div class="tr"><div class="k">🐾 習性</div><div class="v" id="tHabit">—</div></div>
           <div class="tr"><div class="k">📍 活動範圍</div><div class="v" id="tRange">—</div></div>
         </div>
+        <h4>🕰️ 記憶時間軸</h4>
+        <div class="timeline" id="timeline"></div>
         <h4>🌳 這個地點的故事</h4>
         <div class="place-card">
           <div class="pn">📍 <span id="placeName">—</span></div>
@@ -308,6 +355,10 @@
         </div>
         <h4>💛 主人寄語 · <span id="storyOwnerName">—</span></h4>
         <p id="storyOwner">—</p>
+        <div class="guardian-card">
+          <div class="gtext"><b>🛡️ 成為 <span id="gName">牠</span> 的守護者</b><span class="gsub" id="gCount">目前 0 位守護者</span><span class="gdesc">守護者不是擁有，而是一個承諾：我會持續記得牠。（Demo · 不含付費）</span></div>
+          <button class="gbtn" id="guardBtn" onclick="toggleGuardian()">成為守護者</button>
+        </div>
       </div>
       <div class="actionbar">
         <div class="act flower" id="actFlower" onclick="doFlower()"><div class="ic">🌼</div><div class="lb">送花</div><div class="ct" id="ctFlower">0</div></div>
@@ -324,13 +375,14 @@
           <div class="bar"><i></i></div><div class="sub">已遇見 7 隻 · 尚未發現 13 隻 · 完成度 35%</div>
         </div>
         <div class="filterrow">
-          <div class="chip on" onclick="toggleChip(this)">全部物種</div>
-          <div class="chip" onclick="toggleChip(this)">🐶 狗</div>
-          <div class="chip" onclick="toggleChip(this)">🐱 貓</div>
-          <div class="chip" onclick="toggleChip(this)">⭐ 特殊故事</div>
+          <div class="chip on" onclick="setCollectFilter(this,'all')">全部物種</div>
+          <div class="chip" onclick="setCollectFilter(this,'dog')">🐶 狗</div>
+          <div class="chip" onclick="setCollectFilter(this,'cat')">🐱 貓</div>
+          <div class="chip" onclick="setCollectFilter(this,'special')">⭐ 特殊故事</div>
         </div>
+        <div id="wonBadgeSlot"></div>
         <div class="grid" id="collectGrid"></div>
-        <div class="note">🎖️ <b>已遇見的每一隻，都是一段真實的生命。</b>收集不是為了擁有，而是為了記得。集滿本冊可獲得「士林區守護者」徽章。</div>
+        <div class="note">🎖️ <b>已遇見的每一隻，都是一段真實的生命。</b>收集不是為了擁有，而是為了記得。集滿三隻主角可獲得「士林區守護者」徽章。<br><span onclick="resetProgress()" style="text-decoration:underline;cursor:pointer">重設我在這個 demo 的所有紀錄</span></div>
       </div>
     </section>
 
@@ -454,6 +506,9 @@
     <div class="tab" data-s="admin" onclick="go('admin')"><div class="ic">🛡️</div><div class="lb">後台</div></div>
   </div>
 
+  <div class="sheet-mask" id="sheetMask" onclick="closeSheet(event)">
+    <div class="sheet" id="sheet"></div>
+  </div>
   <div class="toast" id="toast"></div>
   <div class="flower-rain" id="flowerRain"></div>
 </div>
@@ -487,7 +542,8 @@ const PETS={
     place:"百齡左岸河濱公園 · 基隆河畔長椅",
     placeDesc:"這張河堤邊的長椅，是麻糬十二年來每天早晨的固定座位。林先生在士林市場買完早餐，一人一狗會並肩坐在這裡，看基隆河的河面慢慢亮起來。麻糬走後，林先生偶爾還是會來，替牠在長椅旁曬曬太陽——如果你剛好路過，也可以替牠曬一下。",
     owner:"謝謝每一個願意停下來認識牠的人。牠不在了，但牠曾經那麼認真地活過、愛過。能被陌生人記得，對我來說就是最溫柔的事。",
-    flower:248,met:1032,save:176},
+    flower:248,met:1032,save:176,born:2011,died:2023,species:"dog",
+    kid:"麻糬是一隻愛笑的柴犬哥哥。每天早上牠都會輕輕叫主人起床，然後一起去河邊看太陽公公爬上來。牠最喜歡追球，也喜歡對每個經過的人搖尾巴說早安。現在麻糬住在天上，但只要有人記得牠、想起牠，牠就會一直很開心。"},
   luna:{emoji:"🐱",img:IMG.calico,name:"露娜",sub:"三花貓 · 女孩 · 2015–2024",ownerName:"陳家",
     loc:[25.0954,121.5299],dist:"500 m",
     text:"露娜不是被領養的，是牠自己選了福林路這條街、選了陳家。某個下雨的傍晚，牠坐在陳家門口怎麼趕都不走，就這樣住了下來，一住九年。牠很少撒嬌，卻總在孩子考試前跳上書桌陪讀，在阿嬤午睡時守在腳邊。牠不太像寵物，更像這個家安靜的一份子。",
@@ -498,7 +554,8 @@ const PETS={
     place:"福林公園 · 花圃矮牆",
     placeDesc:"傍晚五點，露娜總會準時出現在福林公園這面矮牆上，看著孩子們一個個從士林國小放學回家。牠守著這個路口九年，附近不少孩子是看著牠長大的。矮牆上到現在還留著牠常趴著曬太陽、磨得發亮的那一小塊。",
     owner:"牠選擇了我們這條街，我們也很幸運被牠選中。如果你傍晚經過福林公園，牠曾經就在那面矮牆上，輕輕看著每一個回家的人。",
-    flower:189,met:742,save:120},
+    flower:189,met:742,save:120,born:2015,died:2024,species:"cat",
+    kid:"露娜是一隻很溫柔的三花貓。每天傍晚牠都會乖乖坐在公園的矮牆上，看小朋友放學回家。牠不太愛喵喵叫，可是只要牠在，大家的心情就會變得好好的。"},
   coco:{emoji:"🐶",img:IMG.golden,name:"拿鐵",sub:"黃金獵犬 · 男孩 · 2016–2023",ownerName:"阿哲",
     loc:[25.1145,121.5352],dist:"2.3 km",
     text:"拿鐵是阿哲高中時全家一起養的狗，陪他熬過考試、陪他哭過失戀，也在他離家上大學那天，趴在門口看著行李被搬上車。此後每次阿哲放假回家，拿鐵都在門口等，尾巴搖得像從沒分開過。牠是家裡最會撒嬌、也最會等待的成員。",
@@ -509,26 +566,55 @@ const PETS={
     place:"天母運動公園 · 大草坪旁高台",
     placeDesc:"拿鐵最愛有風、有很多鳥的地方。阿哲每次從外地回來，第一件事就是帶牠來天母運動公園吹風。牠會站在草坪旁的高台邊緣，耳朵被風吹得翻過來，望向遠方的山，像在等什麼還沒到的東西。",
     owner:"謝謝你來聽牠的故事。牠這輩子最擅長的就是等待——等我放學、等我放假、等我回家。希望牠現在在某個有風的地方，不用再等了。",
-    flower:97,met:410,save:58}
+    flower:97,met:410,save:58,born:2016,died:2023,species:"dog",
+    kid:"拿鐵是一隻毛毛的黃金獵犬。牠最喜歡在大草地上跑來跑去，讓風呼呼地吹過耳朵。每次哥哥回家，拿鐵都會在門口搖著大尾巴，開心地迎接他。"},
+  charlie:{emoji:"🐕",img:IMG.beagle,name:"查理",sub:"米格魯 · 男孩 · 2013–2022",ownerName:"周先生",
+    loc:[25.0927,121.5309],dist:"690 m",species:"dog",born:2013,died:2022,
+    text:"查理是周先生退休後養的第一隻狗。兩個人每天清晨到士林官邸公園報到，查理負責用鼻子把整座花園巡一遍，周先生負責在長廊的椅子上看報紙。牠的鼻子特別靈，總能在草叢裡翻出別人掉的手套、帽子，得意地叼回來獻寶。",
+    quote:"「牠讓我的退休生活，每天都有一件非做不可的事——陪牠散步。」",
+    like:"官邸花園的青草味、追蝴蝶、把掉在地上的東西叼回來，還有散步後那根獎勵的潔牙骨。",
+    habit:"清晨一定要繞完整座玫瑰園才肯回家；聞到別的狗會興奮地嗚嗚叫；聽到「回家囉」會裝作沒聽到、多賴五分鐘。",
+    range:"士林官邸公園的花園步道一圈，最愛玫瑰園與生態池那一段。",
+    place:"士林官邸公園 · 玫瑰園步道",
+    placeDesc:"查理走過官邸這條步道整整九年。周先生說，現在自己一個人來，走到玫瑰園還是會習慣性回頭，看看查理有沒有跟上。如果你在清晨經過，替牠聞聞花香吧。",
+    owner:"謝謝你認識牠。牠是我退休後最好的朋友，教會我慢慢走、好好看這個世界。",
+    flower:64,met:301,save:41,
+    kid:"查理是一隻鼻子很厲害的米格魯。牠每天早上都會在大花園裡走一圈，把小朋友掉的手套、帽子通通找出來，開心地叼給爺爺看。牠最喜歡追漂亮的蝴蝶了。"},
+  banban:{emoji:"🐈",img:IMG.tabby2,name:"斑斑",sub:"虎斑貓 · 女孩 · 2012–2023",ownerName:"芝山里居民",
+    loc:[25.1033,121.5302],dist:"1.0 km",species:"cat",born:2012,died:2023,
+    text:"斑斑是芝山岩步道上大家都認識的貓。牠沒有特定的主人，卻被整個里的人共同照顧了十一年。爬山的人會帶飼料上來，晨運的阿公會留一塊魚，孩子們會蹲在步道邊跟牠說學校的事。牠就坐在百年老樹下，安靜地聽每一個人說話。",
+    quote:"「牠不屬於誰，卻屬於這座山的每一個人。」",
+    like:"老樟樹下的樹蔭、曬過太陽的石階、爬山客背包裡的小魚乾，還有安靜坐著聽人說話。",
+    habit:"每天固定在步道入口第二個轉角等人；只讓熟面孔摸頭；廟會熱鬧時會躲進樹叢裡看。",
+    range:"芝山岩環狀步道一帶，以百年老樟樹和惠濟宮周邊為主要地盤。",
+    place:"芝山岩 · 百年老樟樹下",
+    placeDesc:"這棵老樟樹下的石階，是斑斑十一年來的固定位置。牠走後，常有爬山的人在這裡多放一小撮飼料，像是跟一位老朋友打聲招呼。如果你爬上芝山岩，記得往這裡看一眼。",
+    owner:"我們沒有人是牠的主人，但我們每個人都想牠。牠是芝山岩的一部分。",
+    flower:88,met:356,save:52,
+    kid:"斑斑是一隻住在山上的虎斑貓。牠沒有自己的家，可是山上每個人都很愛牠、輪流照顧牠。牠最喜歡坐在好大好大的老樹下，安安靜靜地聽大家說話。"}
 };
 
-/* 我的位置（士林市區） + 未解鎖地點（士林官邸公園、芝山岩） */
+/* 我的位置（士林市區） + 未解鎖地點（走近才解鎖 · §10 接近解鎖機制） */
 const ME=[25.0958,121.5250];
 const LOCKED={
-  l1:{img:IMG.beagle,emoji:"🐕",species:"dog",loc:[25.0927,121.5309],name:"士林官邸公園"},
-  l2:{img:IMG.tabby2,emoji:"🐈",species:"cat",loc:[25.1033,121.5302],name:"芝山岩"}
+  l1:{petId:"charlie",img:IMG.beagle,emoji:"🐕",species:"dog",loc:[25.0927,121.5309],name:"士林官邸公園",dist:"690 m"},
+  l2:{petId:"banban", img:IMG.tabby2,emoji:"🐈",species:"cat",loc:[25.1033,121.5302],name:"芝山岩",dist:"1.0 km"}
 };
 
-/* collection book */
-const COLLECT=[
-  {n:"麻糬",img:IMG.shiba,e:"🐶",got:1,star:1,id:"mochi"},
-  {n:"露娜",img:IMG.calico,e:"🐱",got:1,star:0,id:"luna"},
-  {n:"拿鐵",img:IMG.golden,e:"🐶",got:1,star:1,id:"coco"},
-  {n:"棉花",img:IMG.white,e:"🐱",got:1,star:0,blurb:"棉花 · 士林夜市騎樓下等雨停的白貓 🐱"},
-  {n:"豆豆",img:IMG.shiba2,e:"🐶",got:1,star:0,blurb:"豆豆 · 百齡河濱最愛撿樹枝的柴犬弟弟 🐶"},
-  {n:"橘子",img:IMG.ginger,e:"🐱",got:1,star:0,blurb:"橘子 · 福林公園麵包店門口的橘貓常客 🐱"},
-  {n:"咪咪",img:IMG.tabby,e:"🐱",got:1,star:1,blurb:"咪咪 · 陪伴天母獨居阿公十四年的虎斑老貓 🐱"},
-  {got:0},{got:0},{got:0},{got:0},{got:0}
+/* ---------- persistence（localStorage · 讓互動與解鎖跨重整保留） ---------- */
+const SKEY='pmm_v1';
+let ST=(()=>{try{return JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){return{}}})();
+['flowers','saves','mets','guardians','unlocked'].forEach(k=>ST[k]=ST[k]||{});
+function persist(){try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}}
+function resetProgress(){if(confirm('清除你在這個 demo 的所有互動與解鎖紀錄？')){localStorage.removeItem(SKEY);location.reload();}}
+
+/* 地圖上出現的三隻主角 + 收藏冊裡「先前已遇見」的寵物 */
+const FEATURED=['mochi','luna','coco'];
+const EXTRAS=[
+  {n:"棉花",img:IMG.white,e:"🐱",species:"cat",star:1,blurb:"棉花 · 士林夜市騎樓下等雨停的白貓 🐱"},
+  {n:"豆豆",img:IMG.shiba2,e:"🐶",species:"dog",star:0,blurb:"豆豆 · 百齡河濱最愛撿樹枝的柴犬弟弟 🐶"},
+  {n:"橘子",img:IMG.ginger,e:"🐱",species:"cat",star:0,blurb:"橘子 · 福林公園麵包店門口的橘貓常客 🐱"},
+  {n:"咪咪",img:IMG.tabby,e:"🐱",species:"cat",star:1,blurb:"咪咪 · 陪伴天母獨居阿公十四年的虎斑老貓 🐱"}
 ];
 
 /* ---------- nav ---------- */
@@ -548,44 +634,109 @@ function go(s){
 }
 
 /* ---------- story ---------- */
-let cur=null;
+let cur=null, mode='real';
+const $=id=>document.getElementById(id);
 function openStory(id){
-  const p=PETS[id];cur=id;
-  document.getElementById('storyPhoto').innerHTML=avaHTML(p.img,p.emoji);
-  document.getElementById('storyName').textContent=p.name;
-  document.getElementById('storySub').textContent=p.sub+" · "+p.place.split(' · ')[0];
-  document.getElementById('storyText').textContent=p.text;
-  document.getElementById('storyQuote').textContent=p.quote;
-  document.getElementById('tLike').textContent=p.like;
-  document.getElementById('tHabit').textContent=p.habit;
-  document.getElementById('tRange').textContent=p.range;
-  document.getElementById('placeName').textContent=p.place;
-  document.getElementById('placeDesc').textContent=p.placeDesc;
-  document.getElementById('storyOwnerName').textContent=p.ownerName;
-  document.getElementById('storyOwner').textContent=p.owner;
-  document.getElementById('mFlower').textContent=p.flower;
-  document.getElementById('mMet').textContent=p.met.toLocaleString();
-  document.getElementById('mSave').textContent=p.save;
-  ['actFlower','actSave','actMet'].forEach(a=>document.getElementById(a).classList.remove('done'));
-  document.getElementById('ctFlower').textContent=p.flower;
-  document.getElementById('ctSave').textContent=p.save;
-  document.getElementById('ctMet').textContent=p.met;
-  document.getElementById('headTitle').textContent=p.name+" 的故事";
-  document.getElementById('headSub').textContent="真實生命 · 數位記憶";
+  const p=PETS[id];cur=id;mode='real';
+  $('storyPhoto').innerHTML=avaHTML(p.img,p.emoji);
+  $('storyName').textContent=p.name;
+  $('storySub').textContent=p.sub+" · "+p.place.split(' · ')[0];
+  $('storyQuote').textContent=p.quote;
+  $('tLike').textContent=p.like;$('tHabit').textContent=p.habit;$('tRange').textContent=p.range;
+  $('placeName').textContent=p.place;$('placeDesc').textContent=p.placeDesc;
+  $('storyOwnerName').textContent=p.ownerName;$('storyOwner').textContent=p.owner;
+  applyMode(); renderTimeline(p);
+  const fOwn=ST.flowers[id]?1:0, sOwn=ST.saves[id]?1:0, mOwn=ST.mets[id]?1:0;
+  $('mFlower').textContent=$('ctFlower').textContent=p.flower+fOwn;
+  $('mSave').textContent=$('ctSave').textContent=p.save+sOwn;
+  $('ctMet').textContent=p.met+mOwn; $('mMet').textContent=(p.met+mOwn).toLocaleString();
+  $('actFlower').classList.toggle('done',!!ST.flowers[id]);
+  $('actSave').classList.toggle('done',!!ST.saves[id]);
+  $('actMet').classList.toggle('done',!!ST.mets[id]);
+  $('gName').textContent=p.name; updateGuardianUI(id,p);
+  $('headTitle').textContent=p.name+" 的故事";
+  $('headSub').textContent="真實生命 · 數位記憶";
   go('story');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
 }
+/* 真實／兒童版切換（§12.3 真實與改編須明確區分） */
+function setMode(m){mode=m;applyMode();}
+function applyMode(){
+  const p=PETS[cur],kid=mode==='kid';
+  $('mReal').classList.toggle('on',!kid);$('mKid').classList.toggle('on',kid);
+  const b=$('modeBanner');b.classList.toggle('kid',kid);
+  b.textContent=kid?'🧸 兒童版改編 · 溫柔重述真實故事，不等於亡者本人（依內容規範）':'📖 真實生命故事 · 由主人親自提供';
+  $('storyH4').textContent=kid?'🧸 給孩子的故事':'📖 牠與主人的故事';
+  $('storyText').textContent=kid?(p.kid||p.text):p.text;
+}
+function renderTimeline(p){
+  const met=p.met+(ST.mets[cur]?1:0), place=p.place.split(' · ')[0];
+  const rows=[
+    [p.born, `來到這個世界`],
+    [p.born, `在 ${place} 留下最初的記憶`],
+    [p.died, `牠離開了，留下滿滿的故事`],
+    ['至今', `已被 ${met.toLocaleString()} 個人在這裡遇見、記得`]
+  ];
+  $('timeline').innerHTML=rows.map(([y,t])=>`<div class="ti"><div class="yr">${y}${typeof y==='number'?' 年':''}</div><div class="tx">${t}</div></div>`).join('');
+}
+/* 守護者（§15.3 · demo 僅示意角色，不含付費） */
+function updateGuardianUI(id,p){
+  const on=!!ST.guardians[id], base=Math.max(3,Math.round(p.flower/12)), n=base+(on?1:0);
+  $('gCount').textContent=`目前 ${n} 位守護者`;
+  const btn=$('guardBtn');btn.classList.toggle('on',on);btn.textContent=on?'✓ 你是守護者':'成為守護者';
+}
+function toggleGuardian(){
+  const on=!ST.guardians[cur];if(on)ST.guardians[cur]=true;else delete ST.guardians[cur];persist();
+  updateGuardianUI(cur,PETS[cur]);renderCollect();
+  toast(on?`你成為了 ${PETS[cur].name} 的守護者 🛡️`:'已取消守護者身分');
+}
 
-/* ---------- interactions ---------- */
-function doFlower(){const b=document.getElementById('actFlower'),c=document.getElementById('ctFlower');
-  if(b.classList.contains('done'))return;b.classList.add('done');const v=(+c.textContent)+1;c.textContent=v;
-  document.getElementById('mFlower').textContent=v;PETS[cur].flower=v;flowerRain();toast('你替牠獻上了一朵花 🌼');}
-function doSave(){const b=document.getElementById('actSave'),c=document.getElementById('ctSave');
-  const on=b.classList.toggle('done');let v=+c.textContent;v+=on?1:-1;c.textContent=v;
-  document.getElementById('mSave').textContent=v;PETS[cur].save=v;toast(on?'已收藏到你的記憶冊 🔖':'已取消收藏');}
-function doMet(){const b=document.getElementById('actMet'),c=document.getElementById('ctMet');
-  if(b.classList.contains('done'))return;b.classList.add('done');const v=(+c.textContent)+1;c.textContent=v;
-  document.getElementById('mMet').textContent=v.toLocaleString();PETS[cur].met=v;toast('已記錄「遇見」👣 主人會知道又有人記得牠');}
+/* ---------- interactions（持久化） ---------- */
+function doFlower(){if(ST.flowers[cur])return;ST.flowers[cur]=true;persist();
+  const v=PETS[cur].flower+1;$('ctFlower').textContent=$('mFlower').textContent=v;
+  $('actFlower').classList.add('done');flowerRain();toast('你替牠獻上了一朵花 🌼');}
+function doSave(){const on=!ST.saves[cur];if(on)ST.saves[cur]=true;else delete ST.saves[cur];persist();
+  const v=PETS[cur].save+(on?1:0);$('ctSave').textContent=$('mSave').textContent=v;
+  $('actSave').classList.toggle('done',on);renderCollect();toast(on?'已收藏到你的記憶冊 🔖':'已取消收藏');}
+function doMet(){if(ST.mets[cur])return;ST.mets[cur]=true;persist();
+  const v=PETS[cur].met+1;$('ctMet').textContent=v;$('mMet').textContent=v.toLocaleString();
+  $('actMet').classList.add('done');renderTimeline(PETS[cur]);renderCollect();
+  toast('已記錄「遇見」👣 主人會知道又有人記得牠');}
+
+/* ---------- 接近解鎖（§10 出沒規則：接近後解鎖） ---------- */
+function openLockSheet(key){
+  const l=LOCKED[key];
+  $('sheet').innerHTML=`
+    <div class="grip"></div>
+    <div class="lockphoto">${avaHTML(l.img,l.emoji)}<div class="lk">🔒</div></div>
+    <h3>這裡有一段記憶</h3>
+    <div class="stipe">📍 ${l.name} · 尚未解鎖</div>
+    <div class="distbar"><i id="distFill"></i></div>
+    <div class="distnum" id="distNum">距離 ${l.dist}</div>
+    <button class="walkbtn" id="walkBtn" onclick="walkCloser('${key}')">🚶 走過去看看（模擬接近）</button>
+    <div class="fine">走進出沒範圍（約 100 公尺）就會解鎖牠的故事，並自動記下你們的相遇。<br>此處為公共場所的安全近似位置。</div>`;
+  $('sheetMask').classList.add('show');
+}
+function closeSheet(e){if(!e||e.target.id==='sheetMask')$('sheetMask').classList.remove('show');}
+function walkCloser(key){
+  const l=LOCKED[key],btn=$('walkBtn');btn.disabled=true;btn.textContent='走近中…';
+  const start=parseFloat(l.dist)*(l.dist.includes('km')?1000:1);let d=start;
+  const iv=setInterval(()=>{
+    d-=Math.max(25,start/20);
+    if(d<=80){clearInterval(iv);$('distFill').style.width='100%';$('distNum').textContent='已抵達 · 解鎖中';unlockPet(key);return;}
+    $('distFill').style.width=Math.max(8,100-d/start*100)+'%';
+    $('distNum').textContent='距離 '+(d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m');
+  },110);
+}
+function unlockPet(key){
+  const l=LOCKED[key],pid=l.petId,p=PETS[pid];
+  ST.unlocked[key]=pid;ST.mets[pid]=true;persist();
+  if(MARKERS_MAP[key]){const m=MARKERS_MAP[key];m.setIcon(pinIcon(p.img,p.emoji,false));
+    m.off('click');m.on('click',()=>openStory(pid));
+    const rec=MARKERS.find(o=>o.key===key);if(rec)rec.today=true;}
+  renderNearby();renderCollect();
+  setTimeout(()=>{$('sheetMask').classList.remove('show');toast('🔓 解鎖成功！你遇見了 '+p.name);openStory(pid);},400);
+}
 function flowerRain(){const box=document.getElementById('flowerRain'),ico=['🌼','🌸','💛','🌷'];
   for(let i=0;i<14;i++){const s=document.createElement('span');s.textContent=ico[i%4];
     s.style.left=Math.random()*90+5+'%';s.style.animationDuration=(1.6+Math.random()*1.4)+'s';
@@ -603,27 +754,25 @@ function adminTab(el,k){el.parentElement.querySelectorAll('.admin-tab').forEach(
 function reviewDone(btn,msg){const card=btn.closest('.review-card');card.style.transition='.3s';card.style.opacity='0';card.style.transform='scale(.96)';setTimeout(()=>card.remove(),300);toast(msg);}
 
 /* ---------- map (Leaflet + OpenStreetMap · 台北市士林區) ---------- */
-let MAP,MARKERS=[];
+let MAP,MARKERS=[],MARKERS_MAP={};
 function pinIcon(url,emoji,locked){
   return L.divIcon({className:'',iconSize:[50,60],iconAnchor:[25,56],
     html:`<div class="pin${locked?' locked':''}">${locked?'':'<div class="pulse"></div>'}<div class="bubble">${avaHTML(url,emoji)}${locked?'<div class="lk">🔒</div>':''}</div></div>`});
 }
 function initMap(){
   MAP=L.map('map',{zoomControl:false,scrollWheelZoom:false,attributionControl:true}).setView(ME,14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,
-    attribution:'© OpenStreetMap'}).addTo(MAP);
-  // 我的位置
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(MAP);
   L.marker(ME,{icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],html:'<div class="me-pin"></div>'})}).addTo(MAP);
   const bounds=[ME];
-  // 已解鎖寵物
-  Object.keys(PETS).forEach(id=>{const p=PETS[id];
-    const sp=p.emoji==='🐱'?'cat':'dog';
+  // 三隻主角（已解鎖）
+  FEATURED.forEach(id=>{const p=PETS[id];const sp=p.species||(p.emoji==='🐱'?'cat':'dog');
     const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false)}).addTo(MAP).on('click',()=>openStory(id));
     MARKERS.push({m,species:sp,today:true});bounds.push(p.loc);});
-  // 未解鎖地點
-  Object.values(LOCKED).forEach(l=>{
-    const m=L.marker(l.loc,{icon:pinIcon(l.img,l.emoji,true)}).addTo(MAP).on('click',()=>toast('走近一點就能解鎖這段故事 🔒'));
-    MARKERS.push({m,species:l.species,today:false});bounds.push(l.loc);});
+  // 未解鎖地點（走近才解鎖）— 若已解鎖則以正常標記顯示
+  Object.keys(LOCKED).forEach(key=>{const l=LOCKED[key],p=PETS[l.petId],un=!!ST.unlocked[key];
+    const m=L.marker(l.loc,{icon:pinIcon(un?p.img:l.img,un?p.emoji:l.emoji,!un)}).addTo(MAP);
+    m.on('click',()=> un?openStory(l.petId):openLockSheet(key));
+    MARKERS.push({m,species:l.species,today:un,key});MARKERS_MAP[key]=m;bounds.push(l.loc);});
   MAP.fitBounds(bounds,{padding:[42,42]});
 }
 function filterSpecies(el,kind){
@@ -648,37 +797,49 @@ function renderToday(){
 }
 function renderNearby(){
   const box=document.getElementById('nearbyList');
-  const rows=[
-    {id:"luna"},
-    {id:"mochi"},
-    {id:"coco"},
-    {locked:1,img:LOCKED.l1.img,emoji:"🐕",meta:"米格魯 · 需走近解鎖",dist:"690 m",place:"士林官邸公園"}
-  ];
+  const rows=[{id:"luna"},{id:"mochi"},{id:"coco"},
+    ST.unlocked.l1?{id:"charlie"}:{lock:"l1"}];
   box.innerHTML=rows.map(r=>{
-    if(r.locked)return `<div class="listrow" onclick="toast('走近一點就能解鎖 🔒')">
-      <div class="ava" style="filter:grayscale(1) opacity(.6)">${avaHTML(r.img,r.emoji)}</div>
-      <div class="body"><div class="nm">🔒 尚未解鎖</div><div class="meta">${r.meta}</div>
-      <div class="place">📍 走到附近即可遇見</div></div><div class="rt"><div class="d">${r.dist}</div></div></div>`;
+    if(r.lock){const l=LOCKED[r.lock];
+      return `<div class="listrow" onclick="openLockSheet('${r.lock}')">
+        <div class="ava" style="filter:grayscale(1) opacity(.6)">${avaHTML(l.img,l.emoji)}</div>
+        <div class="body"><div class="nm">🔒 尚未解鎖</div><div class="meta">${l.species==='dog'?'米格魯':'虎斑貓'} · 需走近解鎖</div>
+        <div class="place">📍 ${l.name} · 走到附近即可遇見</div></div>
+        <div class="rt"><div class="d">${l.dist}</div></div></div>`;}
     const p=PETS[r.id];
     return `<div class="listrow" onclick="openStory('${r.id}')">
       <div class="ava">${avaHTML(p.img,p.emoji)}</div>
       <div class="body"><div class="nm">${p.name}</div><div class="meta">${p.sub.split(' · ').slice(0,2).join(' · ')}</div>
       <div class="place">📍 ${p.place.split(' · ')[0]}</div></div>
-      <div class="rt"><div class="d">${p.dist}</div><div class="fl">🌼 ${p.flower}</div></div></div>`;
+      <div class="rt"><div class="d">${p.dist}</div><div class="fl">🌼 ${p.flower+(ST.flowers[r.id]?1:0)}</div></div></div>`;
   }).join('');
 }
+let cfilter='all';
+function setCollectFilter(el,f){el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');cfilter=f;renderCollect();}
 function renderCollect(){
-  const g=document.getElementById('collectGrid');
-  g.innerHTML=COLLECT.map(c=>{
-    if(!c.got)return `<div class="cell locked"><div class="e">❔</div><div class="ln">未發現</div></div>`;
-    const act=c.id?`openStory('${c.id}')`:`toast('${c.blurb}')`;
-    return `<div class="cell" onclick="${act}">${avaHTML(c.img,c.e)}
-      ${c.star?'<div class="star">⭐</div>':''}<div class="n">${c.n}</div></div>`;
+  const known=[];
+  FEATURED.forEach(id=>{const p=PETS[id];known.push({id,n:p.name,img:p.img,e:p.emoji,species:p.species,met:!!ST.mets[id],star:!!ST.saves[id]});});
+  Object.keys(LOCKED).forEach(key=>{if(ST.unlocked[key]){const id=LOCKED[key].petId,p=PETS[id];
+    known.push({id,n:p.name,img:p.img,e:p.emoji,species:p.species,met:!!ST.mets[id],star:!!ST.saves[id],special:true});}});
+  EXTRAS.forEach(x=>known.push({n:x.n,img:x.img,e:x.e,species:x.species,met:true,star:!!x.star,blurb:x.blurb}));
+  const discovered=known.filter(k=>k.met).length, total=known.length+5, pct=Math.round(discovered/total*100);
+  document.querySelector('.progress-hero .bar i').style.width=pct+'%';
+  document.querySelector('.progress-hero .sub').textContent=`已遇見 ${discovered} 隻 · 尚未發現 ${total-discovered} 隻 · 完成度 ${pct}%`;
+  // 士林區守護者徽章：三隻主角全數遇見即解鎖
+  const won=FEATURED.every(id=>ST.mets[id]);
+  $('wonBadgeSlot').innerHTML=won?'<div class="badge-won"><div class="bi">🎖️</div><div class="bt"><b>士林區守護者 · 已解鎖</b><div>你已遇見這一區現身的所有主角，謝謝你記得牠們</div></div></div>':'';
+  const list=known.filter(k=> cfilter==='all'?true : cfilter==='special'?(k.special||k.star) : k.species===cfilter);
+  let html=list.map(k=>{
+    if(!k.met)return `<div class="cell locked" onclick="${k.id?`openStory('${k.id}')`:''}"><div class="e">${k.e}</div><div class="ln">尚未遇見</div></div>`;
+    const act=k.id?`openStory('${k.id}')`:`toast('${k.blurb}')`;
+    return `<div class="cell" onclick="${act}">${avaHTML(k.img,k.e)}${k.star?'<div class="star">⭐</div>':''}<div class="n">${k.n}</div></div>`;
   }).join('');
+  if(cfilter==='all')for(let i=0;i<5;i++)html+='<div class="cell locked"><div class="e">❔</div><div class="ln">未發現</div></div>';
+  $('collectGrid').innerHTML=html;
 }
 /* init */
 fillDataImg();renderToday();renderNearby();renderCollect();
-if(window.L){initMap();}else{document.getElementById('map').innerHTML='<div style="padding:24px;text-align:center;color:#7c7267;font-size:12px">地圖需要網路連線載入 · 台北市士林區</div>';}
+if(window.L){initMap();}else{$('map').innerHTML='<div style="padding:24px;text-align:center;color:#7c7267;font-size:12px">地圖需要網路連線載入 · 台北市士林區</div>';}
 </script>
 </body>
 </html>
