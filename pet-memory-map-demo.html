@@ -184,6 +184,26 @@
   .badge-won .bi{font-size:30px;}
   .badge-won .bt b{font-size:13.5px;font-weight:900;}
   .badge-won .bt div{font-size:11px;opacity:.9;margin-top:2px;}
+  /* 出沒時段模擬器 (§10) */
+  .tshead{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .timepill{flex:0 0 auto;background:var(--ink);color:#fff;font-size:12px;font-weight:800;padding:6px 11px;border-radius:20px;box-shadow:var(--shadow-sm);}
+  .timechips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;}
+  .timechips::-webkit-scrollbar{display:none;}
+  .timechips .chip{cursor:pointer;}
+  .timechips .chip.on{background:var(--gold);color:#5a4413;border-color:var(--gold);}
+  .pin.dormant .bubble{border-color:#c7bda8;}
+  .pin.dormant .bubble img{filter:grayscale(.7) brightness(.95);opacity:.85;}
+  .pin.dormant .zzz{position:absolute;top:-6px;right:-6px;background:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:var(--shadow-sm);}
+  .petcard .stbadge{position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;padding:3px 8px;border-radius:14px;z-index:2;}
+  .petcard .stbadge.live{background:#e3eddd;color:var(--green-deep);}
+  .petcard .stbadge.rest{background:rgba(255,255,255,.92);color:var(--ink-soft);}
+  .petcard.resting .top .fb,.petcard.resting .top img{filter:grayscale(.6) brightness(.97);}
+  .listrow .stdot{font-size:10px;font-weight:800;margin-top:4px;}
+  .listrow .stdot.live{color:var(--green-deep);}
+  .listrow .stdot.rest{color:var(--ink-soft);}
+  .appear-line{font-size:11.5px;font-weight:700;margin-top:10px;padding:7px 10px;border-radius:10px;background:#fff;display:flex;align-items:center;gap:6px;}
+  .appear-line.live{color:var(--green-deep);}
+  .appear-line.rest{color:var(--ink-soft);}
 
   /* ===== COLLECT ===== */
   .progress-hero{background:linear-gradient(150deg,#5f7d55,#7fa06f);color:#fff;border-radius:20px;padding:18px;margin:4px 0 8px;box-shadow:var(--shadow);}
@@ -286,7 +306,7 @@
 </head>
 <body>
 <div class="phone">
-  <div class="statusbar"><span>9:41</span><span class="dots">記憶地圖 · v1.0</span><span>􀛨 􀙇 100%</span></div>
+  <div class="statusbar"><span id="clock">9:41</span><span class="dots">記憶地圖 · v1.0</span><span>􀛨 􀙇 100%</span></div>
   <div class="apphead">
     <div class="logo">🐾</div>
     <div><h1 id="headTitle">寵物記憶地圖</h1><p id="headSub">在牠生活過的地方，再次遇見</p></div>
@@ -308,7 +328,18 @@
         </div>
         <div class="research-btn" onclick="toast('已重新搜尋此區域 · 台北市士林區 🔍')">🔄 重新搜尋此區域</div>
       </div>
-      <div class="today-strip"><h3>✨ 今日出沒</h3><p>3 隻寵物今天在你附近留下了記憶</p></div>
+      <div class="today-strip">
+        <div class="tshead">
+          <div><h3>✨ 今日出沒</h3><p id="tsSub">依牠們的習性，此刻正在附近出沒</p></div>
+          <div class="timepill" id="timePill">🕘 —</div>
+        </div>
+        <div class="timechips">
+          <div class="chip" onclick="setSimTime(this,7)">🌅 清晨</div>
+          <div class="chip" onclick="setSimTime(this,14)">☀️ 午後</div>
+          <div class="chip" onclick="setSimTime(this,17)">🌆 傍晚</div>
+          <div class="chip" onclick="setSimTime(this,23)">🌙 深夜</div>
+        </div>
+      </div>
       <div class="hcards" id="todayCards"></div>
       <div class="pad" style="padding-top:0">
         <div class="section-title">📍 附近的記憶 <span class="tag">半徑 1.2 km</span></div>
@@ -351,6 +382,7 @@
         <div class="place-card">
           <div class="pn">📍 <span id="placeName">—</span></div>
           <div class="pd" id="placeDesc">—</div>
+          <div class="appear-line" id="appearInfo"></div>
           <div class="safety">✅ 公共場所 · 已通過安全檢查</div>
         </div>
         <h4>💛 主人寄語 · <span id="storyOwnerName">—</span></h4>
@@ -542,7 +574,7 @@ const PETS={
     place:"百齡左岸河濱公園 · 基隆河畔長椅",
     placeDesc:"這張河堤邊的長椅，是麻糬十二年來每天早晨的固定座位。林先生在士林市場買完早餐，一人一狗會並肩坐在這裡，看基隆河的河面慢慢亮起來。麻糬走後，林先生偶爾還是會來，替牠在長椅旁曬曬太陽——如果你剛好路過，也可以替牠曬一下。",
     owner:"謝謝每一個願意停下來認識牠的人。牠不在了，但牠曾經那麼認真地活過、愛過。能被陌生人記得，對我來說就是最溫柔的事。",
-    flower:248,met:1032,save:176,born:2011,died:2023,species:"dog",
+    flower:248,met:1032,save:176,born:2011,died:2023,species:"dog",appear:{from:5,to:9,label:"清晨"},
     kid:"麻糬是一隻愛笑的柴犬哥哥。每天早上牠都會輕輕叫主人起床，然後一起去河邊看太陽公公爬上來。牠最喜歡追球，也喜歡對每個經過的人搖尾巴說早安。現在麻糬住在天上，但只要有人記得牠、想起牠，牠就會一直很開心。"},
   luna:{emoji:"🐱",img:IMG.calico,name:"露娜",sub:"三花貓 · 女孩 · 2015–2024",ownerName:"陳家",
     loc:[25.0954,121.5299],dist:"500 m",
@@ -554,7 +586,7 @@ const PETS={
     place:"福林公園 · 花圃矮牆",
     placeDesc:"傍晚五點，露娜總會準時出現在福林公園這面矮牆上，看著孩子們一個個從士林國小放學回家。牠守著這個路口九年，附近不少孩子是看著牠長大的。矮牆上到現在還留著牠常趴著曬太陽、磨得發亮的那一小塊。",
     owner:"牠選擇了我們這條街，我們也很幸運被牠選中。如果你傍晚經過福林公園，牠曾經就在那面矮牆上，輕輕看著每一個回家的人。",
-    flower:189,met:742,save:120,born:2015,died:2024,species:"cat",
+    flower:189,met:742,save:120,born:2015,died:2024,species:"cat",appear:{from:16,to:19,label:"傍晚"},
     kid:"露娜是一隻很溫柔的三花貓。每天傍晚牠都會乖乖坐在公園的矮牆上，看小朋友放學回家。牠不太愛喵喵叫，可是只要牠在，大家的心情就會變得好好的。"},
   coco:{emoji:"🐶",img:IMG.golden,name:"拿鐵",sub:"黃金獵犬 · 男孩 · 2016–2023",ownerName:"阿哲",
     loc:[25.1145,121.5352],dist:"2.3 km",
@@ -566,10 +598,10 @@ const PETS={
     place:"天母運動公園 · 大草坪旁高台",
     placeDesc:"拿鐵最愛有風、有很多鳥的地方。阿哲每次從外地回來，第一件事就是帶牠來天母運動公園吹風。牠會站在草坪旁的高台邊緣，耳朵被風吹得翻過來，望向遠方的山，像在等什麼還沒到的東西。",
     owner:"謝謝你來聽牠的故事。牠這輩子最擅長的就是等待——等我放學、等我放假、等我回家。希望牠現在在某個有風的地方，不用再等了。",
-    flower:97,met:410,save:58,born:2016,died:2023,species:"dog",
+    flower:97,met:410,save:58,born:2016,died:2023,species:"dog",appear:{from:13,to:17,label:"午後"},
     kid:"拿鐵是一隻毛毛的黃金獵犬。牠最喜歡在大草地上跑來跑去，讓風呼呼地吹過耳朵。每次哥哥回家，拿鐵都會在門口搖著大尾巴，開心地迎接他。"},
   charlie:{emoji:"🐕",img:IMG.beagle,name:"查理",sub:"米格魯 · 男孩 · 2013–2022",ownerName:"周先生",
-    loc:[25.0927,121.5309],dist:"690 m",species:"dog",born:2013,died:2022,
+    loc:[25.0927,121.5309],dist:"690 m",species:"dog",born:2013,died:2022,appear:{from:5,to:8,label:"清晨"},
     text:"查理是周先生退休後養的第一隻狗。兩個人每天清晨到士林官邸公園報到，查理負責用鼻子把整座花園巡一遍，周先生負責在長廊的椅子上看報紙。牠的鼻子特別靈，總能在草叢裡翻出別人掉的手套、帽子，得意地叼回來獻寶。",
     quote:"「牠讓我的退休生活，每天都有一件非做不可的事——陪牠散步。」",
     like:"官邸花園的青草味、追蝴蝶、把掉在地上的東西叼回來，還有散步後那根獎勵的潔牙骨。",
@@ -581,7 +613,7 @@ const PETS={
     flower:64,met:301,save:41,
     kid:"查理是一隻鼻子很厲害的米格魯。牠每天早上都會在大花園裡走一圈，把小朋友掉的手套、帽子通通找出來，開心地叼給爺爺看。牠最喜歡追漂亮的蝴蝶了。"},
   banban:{emoji:"🐈",img:IMG.tabby2,name:"斑斑",sub:"虎斑貓 · 女孩 · 2012–2023",ownerName:"芝山里居民",
-    loc:[25.1033,121.5302],dist:"1.0 km",species:"cat",born:2012,died:2023,
+    loc:[25.1033,121.5302],dist:"1.0 km",species:"cat",born:2012,died:2023,appear:{from:9,to:17,label:"白天"},
     text:"斑斑是芝山岩步道上大家都認識的貓。牠沒有特定的主人，卻被整個里的人共同照顧了十一年。爬山的人會帶飼料上來，晨運的阿公會留一塊魚，孩子們會蹲在步道邊跟牠說學校的事。牠就坐在百年老樹下，安靜地聽每一個人說話。",
     quote:"「牠不屬於誰，卻屬於這座山的每一個人。」",
     like:"老樟樹下的樹蔭、曬過太陽的石階、爬山客背包裡的小魚乾，還有安靜坐著聽人說話。",
@@ -633,6 +665,34 @@ function go(s){
   document.getElementById('scrollArea').scrollTop=0;
 }
 
+/* ---------- 出沒時段 (§10.3 出沒時間 + 基本時間條件) ---------- */
+let SIMH=12;
+const pad2=h=>String(h).padStart(2,'0');
+function apStatus(p){if(!p||!p.appear)return{active:true};const a=p.appear;return{active:a.from<=SIMH&&SIMH<a.to};}
+function apRange(p){const a=p.appear;return a?`${a.label} ${pad2(a.from)}:00–${pad2(a.to)}:00`:'整日';}
+function slotName(h){return h<5?'深夜':h<11?'清晨':h<14?'中午':h<17?'午後':h<21?'傍晚':'深夜';}
+function setSimTime(el,h){SIMH=h;updateTimeUI();}
+function updateTimeUI(){
+  document.getElementById('clock').textContent=pad2(SIMH)+':00';
+  document.getElementById('timePill').textContent='🕘 '+pad2(SIMH)+':00 · '+slotName(SIMH);
+  const idx={7:0,14:1,17:2,23:3};
+  document.querySelectorAll('.timechips .chip').forEach((c,i)=>c.classList.toggle('on',idx[SIMH]===i));
+  refreshAppearance();
+}
+function refreshAppearance(){
+  MARKERS.forEach(o=>{
+    if(o.locked&&!ST.unlocked[o.key])return;           // 仍上鎖：保留鎖頭圖示
+    const id=o.petId||o.id;const p=PETS[id];if(!p)return;
+    o.m.setIcon(pinIcon(p.img,p.emoji,false,!apStatus(p).active));
+  });
+  renderToday();renderNearby();
+  if(cur&&document.getElementById('s-story').classList.contains('active'))setAppearInfo(cur);
+}
+function setAppearInfo(id){const p=PETS[id],st=apStatus(p),el=document.getElementById('appearInfo');if(!el)return;
+  el.className='appear-line '+(st.active?'live':'rest');
+  el.textContent=(st.active?'🟢 現在出沒中':'💤 現在不在這裡')+' · 通常在 '+apRange(p)+' 出沒';
+}
+
 /* ---------- story ---------- */
 let cur=null, mode='real';
 const $=id=>document.getElementById(id);
@@ -654,6 +714,7 @@ function openStory(id){
   $('actSave').classList.toggle('done',!!ST.saves[id]);
   $('actMet').classList.toggle('done',!!ST.mets[id]);
   $('gName').textContent=p.name; updateGuardianUI(id,p);
+  setAppearInfo(id);
   $('headTitle').textContent=p.name+" 的故事";
   $('headSub').textContent="真實生命 · 數位記憶";
   go('story');
@@ -731,10 +792,9 @@ function walkCloser(key){
 function unlockPet(key){
   const l=LOCKED[key],pid=l.petId,p=PETS[pid];
   ST.unlocked[key]=pid;ST.mets[pid]=true;persist();
-  if(MARKERS_MAP[key]){const m=MARKERS_MAP[key];m.setIcon(pinIcon(p.img,p.emoji,false));
-    m.off('click');m.on('click',()=>openStory(pid));
+  if(MARKERS_MAP[key]){const m=MARKERS_MAP[key];m.off('click');m.on('click',()=>openStory(pid));
     const rec=MARKERS.find(o=>o.key===key);if(rec)rec.today=true;}
-  renderNearby();renderCollect();
+  refreshAppearance();renderCollect();
   setTimeout(()=>{$('sheetMask').classList.remove('show');toast('🔓 解鎖成功！你遇見了 '+p.name);openStory(pid);},400);
 }
 function flowerRain(){const box=document.getElementById('flowerRain'),ico=['🌼','🌸','💛','🌷'];
@@ -755,9 +815,9 @@ function reviewDone(btn,msg){const card=btn.closest('.review-card');card.style.t
 
 /* ---------- map (Leaflet + OpenStreetMap · 台北市士林區) ---------- */
 let MAP,MARKERS=[],MARKERS_MAP={};
-function pinIcon(url,emoji,locked){
+function pinIcon(url,emoji,locked,dormant){
   return L.divIcon({className:'',iconSize:[50,60],iconAnchor:[25,56],
-    html:`<div class="pin${locked?' locked':''}">${locked?'':'<div class="pulse"></div>'}<div class="bubble">${avaHTML(url,emoji)}${locked?'<div class="lk">🔒</div>':''}</div></div>`});
+    html:`<div class="pin${locked?' locked':''}${dormant?' dormant':''}">${(locked||dormant)?'':'<div class="pulse"></div>'}<div class="bubble">${avaHTML(url,emoji)}${locked?'<div class="lk">🔒</div>':''}</div>${dormant?'<div class="zzz">💤</div>':''}</div>`});
 }
 function initMap(){
   MAP=L.map('map',{zoomControl:false,scrollWheelZoom:false,attributionControl:true}).setView(ME,14);
@@ -766,13 +826,13 @@ function initMap(){
   const bounds=[ME];
   // 三隻主角（已解鎖）
   FEATURED.forEach(id=>{const p=PETS[id];const sp=p.species||(p.emoji==='🐱'?'cat':'dog');
-    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false)}).addTo(MAP).on('click',()=>openStory(id));
-    MARKERS.push({m,species:sp,today:true});bounds.push(p.loc);});
+    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false,!apStatus(p).active)}).addTo(MAP).on('click',()=>openStory(id));
+    MARKERS.push({m,species:sp,today:true,id});bounds.push(p.loc);});
   // 未解鎖地點（走近才解鎖）— 若已解鎖則以正常標記顯示
   Object.keys(LOCKED).forEach(key=>{const l=LOCKED[key],p=PETS[l.petId],un=!!ST.unlocked[key];
-    const m=L.marker(l.loc,{icon:pinIcon(un?p.img:l.img,un?p.emoji:l.emoji,!un)}).addTo(MAP);
+    const m=L.marker(l.loc,{icon:pinIcon(un?p.img:l.img,un?p.emoji:l.emoji, un?!apStatus(p).active:true)}).addTo(MAP);
     m.on('click',()=> un?openStory(l.petId):openLockSheet(key));
-    MARKERS.push({m,species:l.species,today:un,key});MARKERS_MAP[key]=m;bounds.push(l.loc);});
+    MARKERS.push({m,species:l.species,today:un,key,petId:l.petId,locked:true});MARKERS_MAP[key]=m;bounds.push(l.loc);});
   MAP.fitBounds(bounds,{padding:[42,42]});
 }
 function filterSpecies(el,kind){
@@ -787,11 +847,16 @@ function fillDataImg(){document.querySelectorAll('[data-img]').forEach(el=>{
   el.innerHTML=avaHTML(IMG[el.dataset.img],el.dataset.fb);});}
 function renderToday(){
   const box=document.getElementById('todayCards');
-  const items=["luna","mochi","coco"];
-  box.innerHTML=items.map(id=>{const p=PETS[id];return `
-    <div class="petcard" onclick="openStory('${id}')">
+  const items=["luna","mochi","coco"].map(id=>({id,active:apStatus(PETS[id]).active}));
+  items.sort((a,b)=>(b.active?1:0)-(a.active?1:0));
+  const liveN=items.filter(x=>x.active).length;
+  const sub=document.getElementById('tsSub');
+  if(sub)sub.textContent=liveN?`此刻有 ${liveN} 隻正在附近出沒`:'此刻沒有寵物出沒，換個時段看看 🕘';
+  box.innerHTML=items.map(({id,active})=>{const p=PETS[id];return `
+    <div class="petcard${active?'':' resting'}" onclick="openStory('${id}')">
       <div class="top ph">${avaHTML(p.img,p.emoji)}
-        <div class="dist">📍 ${p.dist}</div><div class="lockbadge">🔓 已解鎖</div></div>
+        <div class="dist">📍 ${p.dist}</div>
+        <div class="stbadge ${active?'live':'rest'}">${active?'✨ 出沒中':'💤 '+p.appear.label+'出沒'}</div></div>
       <div class="info"><div class="nm">${p.name}</div><div class="sp">${p.place.split(' · ')[0]}</div>
       <div class="hint">「${p.quote.slice(1,16)}…」</div></div></div>`;}).join('');
 }
@@ -806,11 +871,12 @@ function renderNearby(){
         <div class="body"><div class="nm">🔒 尚未解鎖</div><div class="meta">${l.species==='dog'?'米格魯':'虎斑貓'} · 需走近解鎖</div>
         <div class="place">📍 ${l.name} · 走到附近即可遇見</div></div>
         <div class="rt"><div class="d">${l.dist}</div></div></div>`;}
-    const p=PETS[r.id];
+    const p=PETS[r.id],st=apStatus(p);
     return `<div class="listrow" onclick="openStory('${r.id}')">
       <div class="ava">${avaHTML(p.img,p.emoji)}</div>
       <div class="body"><div class="nm">${p.name}</div><div class="meta">${p.sub.split(' · ').slice(0,2).join(' · ')}</div>
-      <div class="place">📍 ${p.place.split(' · ')[0]}</div></div>
+      <div class="place">📍 ${p.place.split(' · ')[0]}</div>
+      <div class="stdot ${st.active?'live':'rest'}">${st.active?'🟢 出沒中':'💤 '+apRange(p)}</div></div>
       <div class="rt"><div class="d">${p.dist}</div><div class="fl">🌼 ${p.flower+(ST.flowers[r.id]?1:0)}</div></div></div>`;
   }).join('');
 }
@@ -838,8 +904,10 @@ function renderCollect(){
   $('collectGrid').innerHTML=html;
 }
 /* init */
+SIMH=(new Date()).getHours();
 fillDataImg();renderToday();renderNearby();renderCollect();
 if(window.L){initMap();}else{$('map').innerHTML='<div style="padding:24px;text-align:center;color:#7c7267;font-size:12px">地圖需要網路連線載入 · 台北市士林區</div>';}
+updateTimeUI();
 </script>
 </body>
 </html>
