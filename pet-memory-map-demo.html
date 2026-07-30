@@ -237,6 +237,33 @@
   .roleopt .ot b{font-size:13px;font-weight:800;}
   .roleopt .ot .otag{font-size:10px;font-weight:800;color:var(--green-deep);background:#e7efdf;padding:1px 7px;border-radius:20px;margin-left:6px;}
   .roleopt .ot .od{font-size:11px;color:var(--ink-soft);margin-top:3px;line-height:1.5;}
+  /* 生前守候入口 + 在世故事覆寫 */
+  .living-entry{display:flex;gap:13px;align-items:center;background:linear-gradient(150deg,#eef3e8,#e6efdd);border:1px solid #d5e3c9;border-radius:16px;padding:12px 13px;box-shadow:var(--shadow-sm);cursor:pointer;}
+  .living-entry .ava{width:52px;height:52px;border-radius:14px;flex:0 0 52px;}
+  .living-entry .ava .fb{font-size:28px;}
+  .living-entry .le-body{flex:1;}
+  .living-entry .le-body .nm{font-size:14px;font-weight:800;}
+  .living-entry .le-body .le-sub{font-size:11px;color:var(--green-deep);margin-top:2px;}
+  .living-entry .le-go{font-size:22px;color:var(--ink-soft);}
+  #s-story.living .metrics,#s-story.living .actionbar,#s-story.living .guardian-card{display:none;}
+  .living-banner{margin:14px 16px 0;padding:11px 13px;border-radius:13px;background:var(--gold-soft);border:1px solid var(--gold);color:#a5741a;font-size:12px;font-weight:700;line-height:1.55;}
+  /* 塔位現場連動 sheet */
+  .qrbox{text-align:center;margin:6px 0 12px;}
+  .qrbox svg{width:148px;height:148px;border:7px solid #fff;border-radius:12px;box-shadow:var(--shadow-sm);background:#fff;}
+  .qrbox .qcap{font-size:11px;color:var(--ink-soft);margin-top:8px;line-height:1.5;}
+  .tombrow{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#f4eee2;border-radius:12px;padding:10px 12px;font-size:12px;margin-bottom:10px;}
+  .tombrow b{font-weight:800;}
+  .tombrow span{color:var(--ink-soft);font-size:11px;}
+  .onsite{border:1px solid var(--line);border-radius:14px;padding:13px;margin-bottom:12px;background:#fff;}
+  .onsite .ot{font-size:12.5px;font-weight:800;margin-bottom:6px;}
+  .onsite .od{font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+  .onsite .obar{height:8px;border-radius:8px;background:var(--line);overflow:hidden;margin:11px 0 4px;}
+  .onsite .obar i{display:block;height:100%;width:12%;background:linear-gradient(90deg,var(--gold),var(--green));transition:width .1s linear;}
+  .onsite .odist{font-size:11px;font-weight:800;color:var(--green-deep);text-align:center;}
+  .onsite .obtn{width:100%;margin-top:11px;border:none;border-radius:12px;padding:11px;font-size:12.5px;font-weight:800;background:var(--green-deep);color:#fff;cursor:pointer;}
+  .onsite .obtn:disabled{opacity:.6;}
+  .onsite.revealed{background:#eef3e8;border-color:#d5e3c9;}
+  .onsite .msg{font-size:12.5px;line-height:1.75;color:#4b4339;font-style:italic;}
 
   /* ===== COLLECT ===== */
   .progress-hero{background:linear-gradient(150deg,#5f7d55,#7fa06f);color:#fff;border-radius:20px;padding:18px;margin:4px 0 8px;box-shadow:var(--shadow);}
@@ -377,7 +404,13 @@
       <div class="pad" style="padding-top:0">
         <div class="section-title">📍 附近的記憶 <span class="tag">半徑 1.2 km</span></div>
         <div id="nearbyList"></div>
-        <div class="note">🔒 <b>隱私守則：</b>地圖只顯示主人主動指定的公共記憶地點（公園、河濱、廣場等），<b>不顯示住址、精確門牌或塔位位置</b>。標記為安全的近似地點。</div>
+        <div class="section-title" style="margin-top:20px">🌱 你的生前守候 <span class="tag" style="color:#a5741a;background:var(--gold-soft)">私密 · 不在公開地圖</span></div>
+        <div class="living-entry" onclick="openStory('haru')">
+          <div class="ava" data-img="corgi" data-fb="🐶"></div>
+          <div class="le-body"><div class="nm">小春 · 陪伴中</div><div class="le-sub">生前私密建檔 · 只有你看得到</div></div>
+          <div class="le-go">›</div>
+        </div>
+        <div class="note">🔒 <b>隱私守則：</b>地圖只顯示主人主動指定的公共記憶地點（公園、河濱、廣場等），<b>不顯示住址、精確門牌或塔位位置</b>。標記為安全的近似地點。生前建檔的寵物（如小春）在世期間<b>不會出現在公開地圖</b>。</div>
       </div>
     </section>
 
@@ -393,6 +426,7 @@
         </div>
         <div class="htext"><div class="nm" id="storyName">—</div><div class="sub" id="storySub">—</div></div>
       </div>
+      <div class="living-banner" id="livingBanner" style="display:none"></div>
       <div class="metrics">
         <div class="metric"><div class="n" id="mFlower">0</div><div class="l">🌼 收到的花</div></div>
         <div class="metric"><div class="n" id="mMet">0</div><div class="l">👣 遇見的人</div></div>
@@ -418,7 +452,7 @@
           <div class="pn">📍 <span id="placeName">—</span></div>
           <div class="pd" id="placeDesc">—</div>
           <div class="appear-line" id="appearInfo"></div>
-          <div class="safety">✅ 公共場所 · 已通過安全檢查</div>
+          <div class="safety" id="placeSafety">✅ 公共場所 · 已通過安全檢查</div>
         </div>
         <h4>💛 主人寄語 · <span id="storyOwnerName">—</span></h4>
         <p id="storyOwner">—</p>
@@ -593,7 +627,8 @@ const IMG={
   tabby : WM("4/4d/Cat_November_2010-1a.jpg/500px-Cat_November_2010-1a.jpg"),                        // 虎斑貓 · 咪咪
   tabby2: WM("c/c7/Tabby_cat_with_blue_eyes-3336579.jpg/500px-Tabby_cat_with_blue_eyes-3336579.jpg"),// 虎斑貓 · 未解鎖
   black : WM("0/08/Black_Labrador_Retriever_%28Nitro%29.jpg/500px-Black_Labrador_Retriever_%28Nitro%29.jpg"), // 黑犬 · 小黑
-  beagle: WM("f/f9/A_beagle_standing_in_a_dog_park.jpg/500px-A_beagle_standing_in_a_dog_park.jpg")   // 米格魯 · 未解鎖
+  beagle: WM("f/f9/A_beagle_standing_in_a_dog_park.jpg/500px-A_beagle_standing_in_a_dog_park.jpg"),  // 米格魯 · 未解鎖
+  corgi : WM("d/dc/Corgi_Puppy.jpg/500px-Corgi_Puppy.jpg")                                          // 柯基幼犬 · 小春（在世）
 };
 function avaHTML(url,emoji){return `<span class="fb">${emoji}</span><img src="${url}" loading="lazy" alt="" onerror="this.remove()">`;}
 
@@ -658,7 +693,19 @@ const PETS={
     placeDesc:"這棵老樟樹下的石階，是斑斑十一年來的固定位置。牠走後，常有爬山的人在這裡多放一小撮飼料，像是跟一位老朋友打聲招呼。如果你爬上芝山岩，記得往這裡看一眼。",
     owner:"我們沒有人是牠的主人，但我們每個人都想牠。牠是芝山岩的一部分。",
     flower:88,met:356,save:52,
-    kid:"斑斑是一隻住在山上的虎斑貓。牠沒有自己的家，可是山上每個人都很愛牠、輪流照顧牠。牠最喜歡坐在好大好大的老樹下，安安靜靜地聽大家說話。"}
+    kid:"斑斑是一隻住在山上的虎斑貓。牠沒有自己的家，可是山上每個人都很愛牠、輪流照顧牠。牠最喜歡坐在好大好大的老樹下，安安靜靜地聽大家說話。"},
+  haru:{emoji:"🐶",img:IMG.corgi,name:"小春",sub:"柯基 · 女孩 · 2023– · 陪伴中",ownerName:"你",
+    living:true,born:2023,species:"dog",
+    text:"小春是你去年春天在動物之家帶回來的柯基女孩，今年剛滿兩歲。牠現在就趴在你腳邊打呼。你辦了生前契約、開始替牠寫檔案，不是因為捨不得的那一天很近，而是因為——你想把每一個現在都好好留下來，趁記憶還新鮮、趁牠還在。",
+    quote:"「我想把牠的每一個現在都記住，趁牠還在我身邊。」",
+    like:"陽台的太陽、啃不爛的橡膠骨頭、你下班開門的那一刻、追自己的短尾巴。",
+    habit:"聽到零食袋聲音會用短腿狂奔；睡覺翻肚子；散步走到一半會坐下罷工要人抱。",
+    range:"目前還在健康成長中，最常去的是家附近的社區公園。",
+    place:"（私密建檔中 · 未公開地點）",
+    placeDesc:"小春還在世，這份檔案只有你看得到，也還沒有出現在公開地圖上。等到很久很久以後、真的需要的那一天，你可以一鍵把它轉為公開紀念，讓世界也認識牠。在那之前，慢慢寫、慢慢存就好。",
+    owner:"這是寫給未來的自己：謝謝你這麼早就決定，要把牠的好好記住。現在，先回頭摸摸牠吧。",
+    flower:0,met:0,save:0,
+    kid:"小春是一隻腿短短、跑起來像小馬達的柯基妹妹。牠最喜歡曬太陽和啃玩具，還會追自己的小尾巴轉圈圈。牠現在健健康康的，是家裡最開心的小寶貝。"}
 };
 
 /* 我的位置（士林市區） + 未解鎖地點（走近才解鎖 · §10 接近解鎖機制） */
@@ -671,7 +718,7 @@ const LOCKED={
 /* ---------- persistence（localStorage · 讓互動與解鎖跨重整保留） ---------- */
 const SKEY='pmm_v1';
 let ST=(()=>{try{return JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){return{}}})();
-['flowers','saves','mets','guardians','unlocked'].forEach(k=>ST[k]=ST[k]||{});
+['flowers','saves','mets','guardians','unlocked','tomb'].forEach(k=>ST[k]=ST[k]||{});
 if(!ST.role)ST.role='B';
 function persist(){try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}}
 
@@ -734,50 +781,95 @@ function refreshAppearance(){
   renderToday();renderNearby();
   if(cur&&document.getElementById('s-story').classList.contains('active'))setAppearInfo(cur);
 }
-function setAppearInfo(id){const p=PETS[id],st=apStatus(p),el=document.getElementById('appearInfo');if(!el)return;
+function setAppearInfo(id){const p=PETS[id],el=document.getElementById('appearInfo');if(!el)return;
+  if(p.living){el.className='appear-line rest';el.textContent='🌱 私密建檔中 · 未公開地點，僅你可見';return;}
+  const st=apStatus(p);
   el.className='appear-line '+(st.active?'live':'rest');
   el.textContent=(st.active?'🟢 現在出沒中':'💤 現在不在這裡')+' · 通常在 '+apRange(p)+' 出沒';
 }
 
 /* ---------- 使用者分級 · 私密陪伴視圖 ---------- */
 function renderRoleView(id){
-  const r=ROLES[ST.role];
-  $('roleBar').innerHTML=`<span class="ricon">${r.icon}</span>
-    <div class="rmain"><b>以「${r.name}」身分查看</b><div class="rd">${r.desc}</div></div>
-    <span class="rswap">切換 ▾</span>`;
-  let h='';
-  if(r.owner||r.preneed){
-    h+=`<div class="pcard priv"><div class="ph4">🔒 私密陪伴（僅摯親可見）</div>
+  const p=PETS[id];
+  const privHTML=`<div class="pcard priv"><div class="ph4">🔒 私密陪伴（僅摯親可見）</div>
       <div class="prow"><div class="pk">📔</div><div class="pv"><b>完整私密故事・主人日記</b><br><span>寫給自己與家人、不公開的那一面</span></div></div>
       <div class="prow"><div class="pk">🖼️</div><div class="pv"><b>私人相簿・影片</b> <span>· 24 張照片 / 3 支影片</span></div></div>
       <div class="prow"><div class="pk">👣</div><div class="pv"><b>來訪名冊（詳細）</b><br><span>誰來過、誰送了花，一一為你留著</span></div></div>
       <div class="prow"><div class="pk">✏️</div><div class="pv"><b>編輯故事與公開範圍</b> <span>· 私人／家族／匿名公開／公開</span></div></div>
       <button class="pbtn" onclick="toast('（Demo）開啟編輯')">編輯這一頁記憶</button></div>`;
-  }
-  if(r.tomb){
-    h+=`<div class="pcard tomb"><div class="ph4">🏛️ 塔位專屬服務（安厝家人）</div>
-      <div class="prow"><div class="pk">📱</div><div class="pv"><b>現場連動</b><br><span>塔位 QR 掃碼開頁・到現場才解鎖的私密留言與影像・實體獻花↔數位連動</span></div></div>
-      <div class="prow"><div class="pk">🎞️</div><div class="pv"><b>年度紀念內容</b><br><span>忌日／生日自動生成紀念短片・每年專人協助更新一次故事</span></div></div>
-      <div class="prow"><div class="pk">✨</div><div class="pv"><b>IP／兒童改編優先</b><br><span>優先進入 YouTube 內容池與兒童故事、角色圖優先產製</span></div></div></div>`;
-  }
-  if(r.preneed){
-    h+=`<div class="pcard preneed"><div class="ph4">🌱 生前守候（寵物仍在世）</div>
+  const preneedHTML=`<div class="pcard preneed"><div class="ph4">🌱 生前守候（寵物仍在世）</div>
       <div class="prow"><div class="pk">🔏</div><div class="pv"><b>私密建檔中・尚未公開上地圖</b><br><span>先為還在身邊的牠慢慢建立檔案，只有你看得到</span></div></div>
       <div class="prow"><div class="pk">🎂</div><div class="pv"><b>生日／相伴週年紀念</b> <span>· 陪伴每一個現在</span></div></div>
-      <div class="prow"><div class="pk">🤝</div><div class="pv"><b>生前契約已簽</b><br><span>時候到了，可一鍵從私密建檔轉為公開紀念</span></div></div></div>`;
-  }
-  if(r.inst){
-    h+=`<div class="pcard honor"><div class="ph4">🎖️ 榮譽夥伴（公共服務動物）</div>
+      <div class="prow"><div class="pk">🤝</div><div class="pv"><b>生前契約已簽</b><br><span>時候到了，可一鍵從私密建檔轉為公開紀念</span></div></div>
+      <button class="pbtn" onclick="toast('（Demo）一鍵轉為公開紀念')" style="background:var(--green-deep)">🕊️ 轉為公開紀念</button></div>`;
+  const tombHTML=`<div class="pcard tomb"><div class="ph4">🏛️ 塔位專屬服務（安厝家人）</div>
+      <div class="prow"><div class="pk">📱</div><div class="pv"><b>現場連動</b><br><span>塔位 QR 掃碼開頁・到現場才解鎖的私密留言・實體獻花↔數位連動</span></div></div>
+      <div class="prow"><div class="pk">🎞️</div><div class="pv"><b>年度紀念內容</b><br><span>忌日／生日自動生成紀念短片・每年專人協助更新一次故事</span></div></div>
+      <div class="prow"><div class="pk">✨</div><div class="pv"><b>IP／兒童改編優先</b><br><span>優先進入 YouTube 內容池與兒童故事、角色圖優先產製</span></div></div>
+      <button class="pbtn" onclick="openTombSheet('${id}')" style="background:#5a6f7a">🔗 開啟塔位現場連動</button></div>`;
+  const honorHTML=`<div class="pcard honor"><div class="ph4">🎖️ 榮譽夥伴（公共服務動物）</div>
       <div class="prow"><div class="pk">🏅</div><div class="pv"><b>公開榮譽頁</b><br><span>服役紀錄・退役／殉職紀念，讓大眾一起記得</span></div></div>
       <div class="prow"><div class="pk">🧸</div><div class="pv"><b>IP 化與生命教育</b><br><span>做成角色與兒童內容，適合公益故事</span></div></div>
       <div class="prow"><div class="pk">🕊️</div><div class="pv"><b>協助料理後事</b> <span>· 由機關授權，平台協辦</span></div></div></div>`;
+  const guardHTML=`<div class="locknote"><span class="li">🤍</span><div>你以<b>守護者</b>身分陪伴這隻寵物：可以送花、收藏、記錄遇見，並成為牠的守護者。<br>完整私密故事與相簿，只保留給牠真正的家人。</div></div>`;
+  // 在世寵物：只有本人可見，固定顯示生前守候，不可切換身分
+  if(p.living){
+    $('roleBar').innerHTML=`<span class="ricon">🌱</span><div class="rmain"><b>生前守候（你）</b><div class="rd">只有你看得到 · 生前私密建檔</div></div>`;
+    $('rolePanel').innerHTML=privHTML+preneedHTML;return;
   }
-  if(!r.owner&&!r.preneed&&!r.inst){
-    h+=`<div class="locknote"><span class="li">🤍</span><div>你以<b>守護者</b>身分陪伴這隻寵物：可以送花、收藏、記錄遇見，並成為牠的守護者。<br>完整私密故事與相簿，只保留給牠真正的家人。</div></div>`;
-  }
+  const r=ROLES[ST.role];
+  $('roleBar').innerHTML=`<span class="ricon">${r.icon}</span>
+    <div class="rmain"><b>以「${r.name}」身分查看</b><div class="rd">${r.desc}</div></div>
+    <span class="rswap">切換 ▾</span>`;
+  let h='';
+  if(r.owner)h+=privHTML;
+  if(r.tomb)h+=tombHTML;
+  if(r.preneed)h+=preneedHTML;
+  if(r.inst)h+=honorHTML;
+  if(!r.owner&&!r.inst)h+=guardHTML;
   $('rolePanel').innerHTML=h;
 }
+/* 塔位現場連動：QR + 實體獻花連動 + 現地解鎖私密留言 */
+function qrSVG(seed){
+  const N=25,c=6,pad=2,sz=(N+pad*2)*c;let s=0;for(let i=0;i<seed.length;i++)s=(s*131+seed.charCodeAt(i))>>>0;
+  const rnd=()=>{s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;};
+  const finder=(x,y)=>{for(const[ox,oy]of[[0,0],[N-7,0],[0,N-7]]){const rx=x-ox,ry=y-oy;
+    if(rx>=0&&rx<7&&ry>=0&&ry<7)return(rx===0||rx===6||ry===0||ry===6||(rx>=2&&rx<=4&&ry>=2&&ry<=4))?1:2;}return 0;};
+  let r=`<rect width="${sz}" height="${sz}" fill="#fff"/>`;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const f=finder(x,y);let on=f===1?1:f===2?0:(rnd()>0.52?1:0);
+    if(on)r+=`<rect x="${(x+pad)*c}" y="${(y+pad)*c}" width="${c}" height="${c}" fill="#2a2620"/>`;}
+  return `<svg viewBox="0 0 ${sz} ${sz}" xmlns="http://www.w3.org/2000/svg">${r}</svg>`;
+}
+function onsiteHTML(id){const p=PETS[id],un=!!ST.tomb[id];
+  if(un)return `<div class="ot">📍 現地解鎖 · 已抵達塔位現場</div>
+    <div class="msg">「爸媽今天有來看你。你最愛的那顆球我們留著，草地也還在。想你，麻糬。」</div>
+    <div class="od" style="margin-top:8px">這則私密留言只有到塔位現場、通過家人身分才看得到。</div>`;
+  return `<div class="ot">📍 現地解鎖</div>
+    <div class="od">走到塔位現場（地理圍籬內）才能解鎖家人留下的私密留言與影像。</div>
+    <div class="obar"><i id="tombFill"></i></div><div class="odist" id="tombDist">距離塔位 約 3.2 km</div>
+    <button class="obtn" id="tombBtn" onclick="walkToTomb('${id}')">🚶 走到塔位現場（模擬）</button>`;
+}
+function openTombSheet(id){const p=PETS[id];
+  $('sheet').innerHTML=`<div class="grip"></div>
+    <h3>🏛️ 塔位現場連動</h3><div class="stipe">${p.name} · 安厝家人專屬</div>
+    <div class="qrbox">${qrSVG('pmm-'+id)}<div class="qcap">貼在塔位上的 QR · 掃碼直達 ${p.name} 的紀念頁</div></div>
+    <div class="tombrow"><b>🌸 實體獻花連動</b><span>現場獻花 3 · 已同步到數位頁</span></div>
+    <div class="onsite ${ST.tomb[id]?'revealed':''}" id="onsiteBox">${onsiteHTML(id)}</div>
+    <button class="walkbtn" onclick="closeSheet()">關閉</button>`;
+  $('sheetMask').classList.add('show');
+}
+function walkToTomb(id){const btn=$('tombBtn');btn.disabled=true;btn.textContent='前往中…';
+  let d=3200;const fill=$('tombFill'),num=$('tombDist');
+  const iv=setInterval(()=>{d-=Math.max(160,3200/20);
+    if(d<=60){clearInterval(iv);ST.tomb[id]=true;persist();
+      const box=$('onsiteBox');box.classList.add('revealed');box.innerHTML=onsiteHTML(id);
+      toast('📍 已抵達塔位現場 · 解鎖家人私密留言');return;}
+    fill.style.width=Math.max(10,100-d/3200*100)+'%';
+    num.textContent='距離塔位 '+(d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m');
+  },110);
+}
 function openRoleSheet(){
+  if(cur&&PETS[cur].living){toast('生前私密建檔僅本人可見，無法切換身分');return;}
   $('sheet').innerHTML=`<div class="grip"></div>
     <h3>以哪種身分查看這隻寵物？</h3>
     <div class="stipe">同一個人，對不同寵物可以是不同身分</div>
@@ -796,7 +888,7 @@ function openStory(id){
   const p=PETS[id];cur=id;mode='real';
   $('storyPhoto').innerHTML=avaHTML(p.img,p.emoji);
   $('storyName').textContent=p.name;
-  $('storySub').textContent=p.sub+" · "+p.place.split(' · ')[0];
+  $('storySub').textContent=p.living?p.sub:p.sub+" · "+p.place.split(' · ')[0];
   $('storyQuote').textContent=p.quote;
   $('tLike').textContent=p.like;$('tHabit').textContent=p.habit;$('tRange').textContent=p.range;
   $('placeName').textContent=p.place;$('placeDesc').textContent=p.placeDesc;
@@ -811,6 +903,11 @@ function openStory(id){
   $('actMet').classList.toggle('done',!!ST.mets[id]);
   $('gName').textContent=p.name; updateGuardianUI(id,p);
   setAppearInfo(id); renderRoleView(id);
+  const lb=$('livingBanner');
+  document.getElementById('s-story').classList.toggle('living',!!p.living);
+  if(p.living){lb.style.display='block';lb.innerHTML=`🌱 <b>生前私密建檔</b> · ${p.name}還在你身邊，這一頁只有你看得到，也還沒公開上地圖。`;}
+  else lb.style.display='none';
+  $('placeSafety').style.display=p.living?'none':'';
   $('headTitle').textContent=p.name+" 的故事";
   $('headSub').textContent="真實生命 · 數位記憶";
   go('story');
@@ -827,13 +924,23 @@ function applyMode(){
   $('storyText').textContent=kid?(p.kid||p.text):p.text;
 }
 function renderTimeline(p){
-  const met=p.met+(ST.mets[cur]?1:0), place=p.place.split(' · ')[0];
-  const rows=[
-    [p.born, `來到這個世界`],
-    [p.born, `在 ${place} 留下最初的記憶`],
-    [p.died, `牠離開了，留下滿滿的故事`],
-    ['至今', `已被 ${met.toLocaleString()} 個人在這裡遇見、記得`]
-  ];
+  let rows;
+  if(p.living){
+    rows=[
+      [p.born, `來到你身邊，成為家人`],
+      [p.born+1, `一起度過第一個生日`],
+      ['現在', `健康長大中 · 你正一點一點把回憶存下來`],
+      ['未來', `需要的那一天，可一鍵轉為公開紀念`]
+    ];
+  }else{
+    const met=p.met+(ST.mets[cur]?1:0), place=p.place.split(' · ')[0];
+    rows=[
+      [p.born, `來到這個世界`],
+      [p.born, `在 ${place} 留下最初的記憶`],
+      [p.died, `牠離開了，留下滿滿的故事`],
+      ['至今', `已被 ${met.toLocaleString()} 個人在這裡遇見、記得`]
+    ];
+  }
   $('timeline').innerHTML=rows.map(([y,t])=>`<div class="ti"><div class="yr">${y}${typeof y==='number'?' 年':''}</div><div class="tx">${t}</div></div>`).join('');
 }
 /* 守護者（§15.3 · demo 僅示意角色，不含付費） */
