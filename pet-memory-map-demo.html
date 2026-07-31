@@ -347,6 +347,15 @@
   .sw.on i{left:21px;}
   .photo-up{border:2px dashed var(--line);border-radius:16px;padding:22px;text-align:center;color:var(--ink-soft);font-size:12px;background:#fdfaf2;}
   .photo-up .big{font-size:30px;margin-bottom:6px;}
+  .photopick{display:flex;gap:9px;overflow-x:auto;padding:10px 0 2px;}
+  .photopick::-webkit-scrollbar{display:none;}
+  .photopick .pp{flex:0 0 56px;width:56px;height:56px;border-radius:14px;overflow:hidden;border:3px solid transparent;cursor:pointer;position:relative;background:#f4eddd;}
+  .photopick .pp img{width:100%;height:100%;object-fit:cover;}
+  .photopick .pp.sel{border-color:var(--gold);box-shadow:var(--shadow-sm);}
+  .sec-sub{font-size:11px;color:var(--ink-soft);text-align:center;margin:16px 0 10px;font-weight:700;}
+  .review-card .badge.mine{background:#e7efdf;color:var(--green-deep);}
+  .check-list li b.wait{color:var(--gold);}
+  .check-list li b.risk{color:#b85757;}
   .primary-btn{width:100%;background:var(--green-deep);color:#fff;border:none;border-radius:15px;padding:14px;font-size:14px;font-weight:800;box-shadow:var(--shadow);cursor:pointer;margin-top:8px;}
   .primary-btn:active{transform:scale(.99);}
   .ghost-btn{width:100%;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:15px;padding:13px;font-size:13px;font-weight:700;margin-top:9px;cursor:pointer;}
@@ -527,46 +536,60 @@
     <section class="screen" id="s-create">
       <div class="pad">
         <div class="section-title" style="margin-top:4px">🐾 為牠建立一頁記憶</div>
-        <div class="photo-up" onclick="toast('（Demo）開啟相簿選擇照片')"><div class="big">📷</div>上傳寵物照片<br><span style="font-size:10.5px">最多 6 張 · 第一張作為封面</span></div>
-        <div style="height:16px"></div>
-        <div class="field"><label>寵物名字</label><input value="麻糬" placeholder="例如：麻糬"></div>
+        <div class="photo-up" onclick="toast('（Demo）真實版會開相簿上傳；此處請於下方選一張代表照片')"><div class="big">📷</div>上傳寵物照片<br><span style="font-size:10.5px">Demo：請在下方挑一張代表照片</span></div>
+        <div class="photopick" id="photoPick"></div>
+        <div style="height:12px"></div>
+        <div class="field"><label>寵物名字</label><input id="petName" value="毛毛" placeholder="例如：麻糬"></div>
         <div class="field" style="display:flex;gap:10px">
-          <div style="flex:1"><label>物種</label><select><option>🐶 狗</option><option>🐱 貓</option></select></div>
-          <div style="flex:1"><label>品種</label><input value="柴犬" placeholder="選填"></div>
+          <div style="flex:1"><label>物種</label><select id="petSpecies"><option>🐶 狗</option><option>🐱 貓</option></select></div>
+          <div style="flex:1"><label>品種</label><input id="petBreed" value="米克斯犬" placeholder="選填"></div>
         </div>
         <div class="field" style="display:flex;gap:10px">
-          <div style="flex:1"><label>出生年</label><input value="2011" inputmode="numeric"></div>
-          <div style="flex:1"><label>離世年 <span class="hint">選填</span></label><input value="2023" inputmode="numeric"></div>
+          <div style="flex:1"><label>出生年</label><input id="petBorn" value="2018" inputmode="numeric"></div>
+          <div style="flex:1"><label>離世年 <span class="hint">留空＝在世</span></label><input id="petDied" value="2024" inputmode="numeric"></div>
         </div>
-        <div class="field"><label>一句話介紹</label><input value="總在清晨六點叫我起床的傻孩子" maxlength="30"></div>
-        <div class="field"><label>牠的生命故事</label><textarea rows="4">麻糬是我剛出社會、一個人租屋時，在河濱公園撿到的浪浪幼犬。牠陪我從一個人，走到成家…</textarea></div>
+        <div class="field"><label>一句話介紹</label><input id="petOneline" value="愛追葉子的開心果" maxlength="30"></div>
+        <div class="field"><label>牠的生命故事</label><textarea id="petStory" rows="4">毛毛是我在士林撿到的浪浪，牠陪我走過好多好多平凡卻閃亮的日子。</textarea></div>
+
         <label style="font-size:12px;font-weight:800;display:block;margin:6px 0 8px">📍 選擇公開記憶地點 <span class="hint" style="font-weight:500">只能選公共場所</span></label>
-        <div class="radio-cards">
-          <div class="radio-card sel" onclick="pickRadio(this)"><div class="dot"></div><div><div class="t">🌳 百齡左岸河濱公園</div><div class="d">士林區 · 基隆河畔 · 寵物友善</div></div></div>
-          <div class="radio-card" onclick="pickRadio(this)"><div class="dot"></div><div><div class="t">🏞️ 福林公園</div><div class="d">士林區 · 士林官邸旁 · 社區公園</div></div></div>
-          <div class="radio-card" onclick="pickRadio(this)"><div class="dot"></div><div><div class="t">🏟️ 天母運動公園</div><div class="d">士林區 · 大草坪 · 開放空間</div></div></div>
-          <div class="radio-card" onclick="pickRadio(this)"><div class="dot"></div><div><div class="t">➕ 從地圖選擇其他公共地點</div><div class="d">不可選私宅／門牌／塔位位置</div></div></div>
+        <div class="radio-cards" id="placeCards">
+          <div class="radio-card sel" onclick="pickRadio(this)" data-loc="25.0931,121.5099" data-pname="百齡左岸河濱公園" data-safe="1"><div class="dot"></div><div><div class="t">🌳 百齡左岸河濱公園</div><div class="d">士林區 · 基隆河畔 · 寵物友善</div></div></div>
+          <div class="radio-card" onclick="pickRadio(this)" data-loc="25.0954,121.5299" data-pname="福林公園" data-safe="1"><div class="dot"></div><div><div class="t">🏞️ 福林公園</div><div class="d">士林區 · 士林官邸旁 · 社區公園</div></div></div>
+          <div class="radio-card" onclick="pickRadio(this)" data-loc="25.1145,121.5352" data-pname="天母運動公園" data-safe="1"><div class="dot"></div><div><div class="t">🏟️ 天母運動公園</div><div class="d">士林區 · 大草坪 · 開放空間</div></div></div>
+          <div class="radio-card" onclick="pickRadio(this)" data-loc="25.0958,121.5250" data-pname="自訂地點（待確認）" data-safe="0"><div class="dot"></div><div><div class="t">➕ 從地圖選擇其他地點</div><div class="d">送審後由後台人工確認是否為公共場所</div></div></div>
         </div>
+
+        <label style="font-size:12px;font-weight:800;display:block;margin:18px 0 8px">🪪 你的身分 <span class="hint" style="font-weight:500">決定審核方式（§11.6）</span></label>
+        <div class="radio-cards" id="identityCards">
+          <div class="radio-card sel" onclick="pickRadio(this)" data-id="A1"><div class="dot"></div><div><div class="t">🏛️ 我是塔位租戶</div><div class="d">合約在檔 · 自動驗證</div></div></div>
+          <div class="radio-card" onclick="pickRadio(this)" data-id="A2"><div class="dot"></div><div><div class="t">💛 我是主人（無塔位）</div><div class="d">上傳晶片／獸醫證明 · 人工審核</div></div></div>
+          <div class="radio-card" onclick="pickRadio(this)" data-id="A3"><div class="dot"></div><div><div class="t">🌱 生前契約（寵物在世）</div><div class="d">契約在檔 · 走生前私密建檔</div></div></div>
+        </div>
+
         <label style="font-size:12px;font-weight:800;display:block;margin:18px 0 8px">🔒 公開權限</label>
+        <div id="createToggles">
         <div class="toggle-row"><div><div class="tt">在地圖上出沒</div><div class="td">讓第三人可在此公共地點遇見牠</div></div><div class="sw on" onclick="tog(this)"><i></i></div></div>
         <div class="toggle-row"><div><div class="tt">允許送花與收藏</div><div class="td">接收陌生人的善意</div></div><div class="sw on" onclick="tog(this)"><i></i></div></div>
         <div class="toggle-row"><div><div class="tt">允許改編為兒童故事</div><div class="td">可能成為 YouTube 溫暖內容</div></div><div class="sw" onclick="tog(this)"><i></i></div></div>
         <div class="toggle-row"><div><div class="tt">作為公益故事</div><div class="td">參與動物關懷主題</div></div><div class="sw" onclick="tog(this)"><i></i></div></div>
+        </div>
         <button class="primary-btn" onclick="submitPet()">送出審核 · 建立記憶頁</button>
         <button class="ghost-btn" onclick="toast('已存為私人草稿')">先存成私人草稿</button>
-        <div class="note">你隨時可以修改公開範圍。送出後會經過內容與地點安全審核，通過才會出現在地圖上。</div>
+        <div class="note">送出後會經過內容與地點安全審核（§11.6），通過才會出現在地圖上。你隨時可以修改公開範圍。</div>
       </div>
     </section>
 
     <!-- 6. ADMIN -->
     <section class="screen" id="s-admin">
       <div class="pad">
-        <div class="section-title" style="margin-top:4px">🛡️ 後台審核 <span class="tag">待處理 3</span></div>
+        <div class="section-title" style="margin-top:4px">🛡️ 後台審核 <span class="tag" id="pendCount">待處理 3</span></div>
         <div class="admin-tabs">
           <div class="admin-tab on" onclick="adminTab(this,'wait')">待審核</div>
           <div class="admin-tab" onclick="adminTab(this,'ok')">已通過</div>
           <div class="admin-tab" onclick="adminTab(this,'risk')">需注意</div>
         </div>
+        <div id="pendingList"></div>
+        <div class="sec-sub" id="sampleHead" style="display:none">— 以下為示範樣本 —</div>
         <div class="review-card">
           <div class="rh"><div class="ava" data-img="shiba" data-fb="🐶"></div><div style="flex:1"><div class="nm">麻糬 · 柴犬</div><div class="sub">主人 林先生 · 5 分鐘前送審</div></div><div class="badge wait">待審核</div></div>
           <ul class="check-list">
@@ -817,6 +840,7 @@ const LOCKED={
 const SKEY='pmm_v1';
 let ST=(()=>{try{return JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){return{}}})();
 ['flowers','saves','mets','guardians','unlocked','tomb','viewsToday','famWall'].forEach(k=>ST[k]=ST[k]||{});
+ST.pending=ST.pending||[]; ST.userPets=ST.userPets||[];
 if(!ST.role)ST.role='B';
 function persist(){try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}}
 
@@ -1221,7 +1245,73 @@ function toast(m){const t=document.getElementById('toast');t.textContent=m;t.cla
 function toggleChip(el){const p=el.parentElement;p.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
 function pickRadio(el){el.parentElement.querySelectorAll('.radio-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
 function tog(el){el.classList.toggle('on');}
-function submitPet(){toast('已送出審核 · 通過後將出現在地圖 ✅');setTimeout(()=>go('admin'),900);}
+/* ---------- 建立 → 後台審核 → 上架 完整閉環（§9 主人端 · §11.6 審核） ---------- */
+const PHOTO_OPTS=[['shiba','🐶'],['calico','🐱'],['golden','🐶'],['white','🐱'],['ginger','🐱'],['corgi','🐶'],['tabby','🐱'],['shiba2','🐶']];
+function renderPhotoPick(){const el=document.getElementById('photoPick');if(!el)return;
+  el.innerHTML=PHOTO_OPTS.map((o,i)=>`<div class="pp${i===0?' sel':''}" data-k="${o[0]}" onclick="pickPhoto(this)"><img loading="lazy" src="${IMG[o[0]]}" alt=""></div>`).join('');}
+function pickPhoto(el){el.parentElement.querySelectorAll('.pp').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');}
+function val(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function submitPet(){
+  const name=val('petName')||'新朋友';
+  const sp=document.getElementById('petSpecies').value.indexOf('貓')>=0?'cat':'dog';
+  const breed=val('petBreed')||(sp==='cat'?'米克斯貓':'米克斯犬');
+  const born=parseInt(val('petBorn'))||null, died=parseInt(val('petDied'))||null;
+  const oneline=val('petOneline'), story=val('petStory');
+  const placeEl=document.querySelector('#placeCards .radio-card.sel');
+  const identity=((document.querySelector('#identityCards .radio-card.sel')||{}).dataset||{}).id||'A2';
+  const photoK=((document.querySelector('#photoPick .pp.sel')||{}).dataset||{}).k||(sp==='cat'?'calico':'shiba');
+  const sws=document.querySelectorAll('#createToggles .sw');
+  const kidsOK=sws[2]&&sws[2].classList.contains('on');
+  const placeSafe=placeEl.dataset.safe==='1';
+  const living=!died||identity==='A3';
+  const loc=placeEl.dataset.loc.split(',').map(Number);
+  const p={id:'u'+Date.now(),name,species:sp,emoji:sp==='cat'?'🐱':'🐶',img:IMG[photoK],
+    breed,born,died,living,identity,placeSafe,kidsOK,submitAgo:'剛剛',
+    sub:`${breed} · ${born||'—'}${living?'– · 陪伴中':'–'+(died||'')}`,
+    ownerName:'你',loc,dist:'—',appear:{from:8,to:18,label:'白天'},
+    text:story||`${name}的故事，主人正在慢慢補充中。`,
+    quote:oneline?`「${oneline}」`:'「謝謝你來認識牠。」',
+    like:'（主人正在慢慢補充中…）',habit:'（主人正在慢慢補充中…）',range:placeEl.dataset.pname,
+    place:placeEl.dataset.pname+' · 公開記憶地點',
+    placeDesc:`這是 ${name} 的公開記憶地點：${placeEl.dataset.pname}。`,
+    owner:oneline||'謝謝你來認識牠。',flower:0,met:0,save:0};
+  ST.pending.push(p);persist();renderPending();
+  toast('已送出審核 ✅ 前往後台查看');setTimeout(()=>go('admin'),700);
+}
+function idCheck(p){return p.identity==='A1'?['✓ 塔位合約已驗','ok']:p.identity==='A3'?['✓ 生前契約已驗','ok']:['⏳ 待人工（證明審核中）','wait'];}
+function renderPending(){
+  const el=document.getElementById('pendingList');if(!el)return;
+  const n=ST.pending.length;
+  const pc=document.getElementById('pendCount');if(pc)pc.textContent='待處理 '+(n+3);
+  const sh=document.getElementById('sampleHead');if(sh)sh.style.display=n?'block':'none';
+  el.innerHTML=ST.pending.map(p=>{const storyOK=(p.text||'').length>=6,idc=idCheck(p);
+    return `<div class="review-card" id="rc-${p.id}">
+      <div class="rh"><div class="ava">${avaHTML(p.img,p.emoji)}</div>
+        <div style="flex:1"><div class="nm">${p.name} · ${p.breed}</div><div class="sub">主人 你 · ${p.submitAgo}送審</div></div>
+        <div class="badge ${p.placeSafe?'mine':'risk'}">${p.placeSafe?'待審核':'需注意'}</div></div>
+      <ul class="check-list">
+        <li>📖 故事內容 <b style="margin-left:auto;color:${storyOK?'var(--green-deep)':'#b85757'}">${storyOK?'✓ 無不當內容':'⚠ 內容過短'}</b></li>
+        <li>📍 地點安全 <b style="margin-left:auto;color:${p.placeSafe?'var(--green-deep)':'#b85757'}">${p.placeSafe?'✓ '+p.range:'⚠ 待人工確認'}</b></li>
+        <li>🖼️ 圖片審核 <b style="margin-left:auto;color:var(--green-deep)">✓ 通過</b></li>
+        <li>🪪 身分驗證 <b style="margin-left:auto;color:${idc[1]==='ok'?'var(--green-deep)':'var(--gold)'}">${idc[0]}</b></li>
+        <li>✨ 角色生成 <b style="margin-left:auto;color:var(--gold)">生成中…</b></li>
+      </ul>
+      <div class="rev-actions"><button class="approve" onclick="approvePet('${p.id}')">通過並上架</button><button class="reject" onclick="rejectPet('${p.id}')">退回</button></div>
+    </div>`;}).join('');
+}
+function approvePet(id){const i=ST.pending.findIndex(p=>p.id===id);if(i<0)return;
+  const p=ST.pending.splice(i,1)[0];ST.userPets.push(p);persist();
+  publishPet(p);renderPending();renderCollect();
+  toast('已通過並上架 · '+p.name+' 出現在地圖了 ✅');}
+function rejectPet(id){const i=ST.pending.findIndex(p=>p.id===id);if(i<0)return;
+  ST.pending.splice(i,1);persist();renderPending();toast('已退回，並通知主人補正');}
+function publishPet(p){
+  PETS[p.id]=p;if(!ONMAP.includes(p.id))ONMAP.push(p.id);DAILY[p.id]=DAILY[p.id]||{cap:60,base:0};
+  if(typeof MAP!=='undefined'&&MAP&&CLUSTER){const st=mapState(p,p.id),tp=petType(p);
+    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false,!st.live,tp,st.badge)}).on('click',()=>openStory(p.id));
+    CLUSTER.addLayer(m);MARKERS.push({m,species:p.species,today:st.live,id:p.id,type:tp});
+    try{MAP.setView(p.loc,15);}catch(e){}}
+}
 function adminTab(el,k){el.parentElement.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
   toast(k==='ok'?'顯示已通過的故事':k==='risk'?'顯示需注意的項目':'顯示待審核項目');}
 function reviewDone(btn,msg){const card=btn.closest('.review-card');card.style.transition='.3s';card.style.opacity='0';card.style.transform='scale(.96)';setTimeout(()=>card.remove(),300);toast(msg);}
@@ -1310,6 +1400,7 @@ function renderCollect(){
   Object.keys(LOCKED).forEach(key=>{if(ST.unlocked[key]){const id=LOCKED[key].petId,p=PETS[id];
     known.push({id,n:p.name,img:p.img,e:p.emoji,species:p.species,met:!!ST.mets[id],star:!!ST.saves[id],special:true});}});
   EXTRAS.forEach(id=>{const p=PETS[id];known.push({id,n:p.name,img:p.img,e:p.emoji,species:p.species,met:true,star:!!ST.saves[id]});});
+  (ST.userPets||[]).forEach(p=>known.push({id:p.id,n:p.name,img:p.img,e:p.emoji,species:p.species,met:!!ST.mets[p.id],star:!!ST.saves[p.id],special:true}));
   const discovered=known.filter(k=>k.met).length, total=known.length+5, pct=Math.round(discovered/total*100);
   document.querySelector('.progress-hero .bar i').style.width=pct+'%';
   document.querySelector('.progress-hero .sub').textContent=`已遇見 ${discovered} 隻 · 尚未發現 ${total-discovered} 隻 · 完成度 ${pct}%`;
@@ -1327,7 +1418,8 @@ function renderCollect(){
 }
 /* init */
 SIMH=(new Date()).getHours();
-fillDataImg();renderToday();renderNearby();renderCollect();
+(ST.userPets||[]).forEach(p=>{PETS[p.id]=p;if(!ONMAP.includes(p.id))ONMAP.push(p.id);DAILY[p.id]=DAILY[p.id]||{cap:60,base:0};});
+fillDataImg();renderPhotoPick();renderPending();renderToday();renderNearby();renderCollect();
 if(window.L){initMap();}else{$('map').innerHTML='<div style="padding:24px;text-align:center;color:#7c7267;font-size:12px">地圖需要網路連線載入 · 台北市士林區</div>';}
 updateTimeUI();
 </script>
