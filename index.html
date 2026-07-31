@@ -245,8 +245,21 @@
   .living-entry .le-body .nm{font-size:14px;font-weight:800;}
   .living-entry .le-body .le-sub{font-size:11px;color:var(--green-deep);margin-top:2px;}
   .living-entry .le-go{font-size:22px;color:var(--ink-soft);}
-  #s-story.living .metrics,#s-story.living .actionbar,#s-story.living .guardian-card{display:none;}
-  .living-banner{margin:14px 16px 0;padding:11px 13px;border-radius:13px;background:var(--gold-soft);border:1px solid var(--gold);color:#a5741a;font-size:12px;font-weight:700;line-height:1.55;}
+  #s-story.living .guardian-card{display:none;}
+  .living-banner{margin:14px 16px 0;padding:11px 13px;border-radius:13px;background:#eef3e8;border:1px solid #d5e3c9;color:var(--green-deep);font-size:12px;font-weight:700;line-height:1.55;}
+  .living-banner.honor{background:#efe7d9;border-color:#d8c6a4;color:#7a5a24;}
+  /* 標記類型：在世（綠）/ 榮譽（銅） */
+  .pin.living .bubble{border-color:#7fa06f;}
+  .pin.living .bubble::after{border-top-color:#7fa06f;}
+  .pin.living .pulse{background:#7fa06f;}
+  .pin.honor .bubble{border-color:#b08d57;}
+  .pin.honor .bubble::after{border-top-color:#b08d57;}
+  .pin.honor .pulse{background:#b08d57;}
+  .pin .tag{position:absolute;top:-6px;right:-6px;background:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;box-shadow:var(--shadow-sm);}
+  /* 洋蔥式分層儀表 */
+  .layermeter{display:flex;gap:6px;margin:10px 16px 0;flex-wrap:wrap;}
+  .layermeter .lchip{flex:1;min-width:70px;text-align:center;font-size:10px;font-weight:800;padding:6px 4px;border-radius:10px;border:1px solid var(--line);background:#f3ede1;color:#b7ad9a;}
+  .layermeter .lchip.on{background:#e7efdf;border-color:var(--green);color:var(--green-deep);}
   /* 塔位現場連動 sheet */
   .qrbox{text-align:center;margin:6px 0 12px;}
   .qrbox svg{width:148px;height:148px;border:7px solid #fff;border-radius:12px;box-shadow:var(--shadow-sm);background:#fff;}
@@ -404,13 +417,7 @@
       <div class="pad" style="padding-top:0">
         <div class="section-title">📍 附近的記憶 <span class="tag">半徑 1.2 km</span></div>
         <div id="nearbyList"></div>
-        <div class="section-title" style="margin-top:20px">🌱 你的生前守候 <span class="tag" style="color:#a5741a;background:var(--gold-soft)">私密 · 不在公開地圖</span></div>
-        <div class="living-entry" onclick="openStory('haru')">
-          <div class="ava" data-img="corgi" data-fb="🐶"></div>
-          <div class="le-body"><div class="nm">小春 · 陪伴中</div><div class="le-sub">生前私密建檔 · 只有你看得到</div></div>
-          <div class="le-go">›</div>
-        </div>
-        <div class="note">🔒 <b>隱私守則：</b>地圖只顯示主人主動指定的公共記憶地點（公園、河濱、廣場等），<b>不顯示住址、精確門牌或塔位位置</b>。標記為安全的近似地點。生前建檔的寵物（如小春）在世期間<b>不會出現在公開地圖</b>。</div>
+        <div class="note">🔒 <b>隱私守則：</b>所有寵物都在公開地圖被「遇見」，但每一頁都是<b>洋蔥式分層</b>——地圖只顯示公共的近似地點（公園、河濱、廣場），<b>不顯示住址、門牌或塔位位置</b>；完整的私密故事、相簿與名冊只向真正的家人揭開。在世寵物（🌱）也在地圖上，公開層只呈現牠開心的樣子，私密日記留給家人。</div>
       </div>
     </section>
 
@@ -433,6 +440,7 @@
         <div class="metric"><div class="n" id="mSave">0</div><div class="l">🔖 被收藏</div></div>
       </div>
       <div class="rolebar" id="roleBar" onclick="openRoleSheet()"></div>
+      <div class="layermeter" id="layerMeter"></div>
       <div id="rolePanel"></div>
       <div class="storybody">
         <div class="mode-banner" id="modeBanner">📖 真實生命故事 · 由主人親自提供</div>
@@ -628,7 +636,8 @@ const IMG={
   tabby2: WM("c/c7/Tabby_cat_with_blue_eyes-3336579.jpg/500px-Tabby_cat_with_blue_eyes-3336579.jpg"),// 虎斑貓 · 未解鎖
   black : WM("0/08/Black_Labrador_Retriever_%28Nitro%29.jpg/500px-Black_Labrador_Retriever_%28Nitro%29.jpg"), // 黑犬 · 小黑
   beagle: WM("f/f9/A_beagle_standing_in_a_dog_park.jpg/500px-A_beagle_standing_in_a_dog_park.jpg"),  // 米格魯 · 未解鎖
-  corgi : WM("d/dc/Corgi_Puppy.jpg/500px-Corgi_Puppy.jpg")                                          // 柯基幼犬 · 小春（在世）
+  corgi : WM("d/dc/Corgi_Puppy.jpg/500px-Corgi_Puppy.jpg"),                                         // 柯基幼犬 · 小春（在世）
+  gsd   : WM("7/79/Police_Dog_at_Toronto_Open_House_03.jpg/500px-Police_Dog_at_Toronto_Open_House_03.jpg") // 德國狼犬警犬 · 勇士（榮譽）
 };
 function avaHTML(url,emoji){return `<span class="fb">${emoji}</span><img src="${url}" loading="lazy" alt="" onerror="this.remove()">`;}
 
@@ -695,17 +704,30 @@ const PETS={
     flower:88,met:356,save:52,
     kid:"斑斑是一隻住在山上的虎斑貓。牠沒有自己的家，可是山上每個人都很愛牠、輪流照顧牠。牠最喜歡坐在好大好大的老樹下，安安靜靜地聽大家說話。"},
   haru:{emoji:"🐶",img:IMG.corgi,name:"小春",sub:"柯基 · 女孩 · 2023– · 陪伴中",ownerName:"你",
-    living:true,born:2023,species:"dog",
-    text:"小春是你去年春天在動物之家帶回來的柯基女孩，今年剛滿兩歲。牠現在就趴在你腳邊打呼。你辦了生前契約、開始替牠寫檔案，不是因為捨不得的那一天很近，而是因為——你想把每一個現在都好好留下來，趁記憶還新鮮、趁牠還在。",
+    living:true,born:2023,species:"dog",loc:[25.0859,121.5204],dist:"1.3 km",appear:{from:8,to:11,label:"早晨"},
+    text:"小春是主人去年春天在動物之家帶回家的柯基女孩，今年剛滿兩歲，正是最活潑的時候。主人辦了生前契約、提早替牠寫檔案——不是因為捨不得的那天很近，而是想把每一個現在都好好留下來，趁記憶還新鮮、趁牠還在。牠現在最重要的任務，就是每天把日子過得開開心心。",
     quote:"「我想把牠的每一個現在都記住，趁牠還在我身邊。」",
-    like:"陽台的太陽、啃不爛的橡膠骨頭、你下班開門的那一刻、追自己的短尾巴。",
+    like:"陽台的太陽、啃不爛的橡膠骨頭、主人下班開門的那一刻、追自己的短尾巴。",
     habit:"聽到零食袋聲音會用短腿狂奔；睡覺翻肚子；散步走到一半會坐下罷工要人抱。",
-    range:"目前還在健康成長中，最常去的是家附近的社區公園。",
-    place:"（私密建檔中 · 未公開地點）",
-    placeDesc:"小春還在世，這份檔案只有你看得到，也還沒有出現在公開地圖上。等到很久很久以後、真的需要的那一天，你可以一鍵把它轉為公開紀念，讓世界也認識牠。在那之前，慢慢寫、慢慢存就好。",
-    owner:"這是寫給未來的自己：謝謝你這麼早就決定，要把牠的好好記住。現在，先回頭摸摸牠吧。",
-    flower:0,met:0,save:0,
-    kid:"小春是一隻腿短短、跑起來像小馬達的柯基妹妹。牠最喜歡曬太陽和啃玩具，還會追自己的小尾巴轉圈圈。牠現在健健康康的，是家裡最開心的小寶貝。"}
+    range:"每天早晨在前港公園的大草坪跑跳，是附近晨運居民都認得的短腿柯基。",
+    place:"前港公園 · 大草坪",
+    placeDesc:"早晨的前港公園草坪，是小春最愛的跑跳場。主人正一點一滴把牠現在的樣子記錄下來。牠還在世，所以這裡你可以送上祝福、幫牠加油——完整的私密日記與相簿，留給牠真正的家人。",
+    owner:"謝謝你替牠加油。牠還在我身邊，我想趁現在，把牠的好好記住。",
+    flower:36,met:88,save:20,
+    kid:"小春是一隻腿短短、跑起來像小馬達的柯基妹妹。牠最喜歡曬太陽和啃玩具，還會追自己的小尾巴轉圈圈。牠現在健健康康的，是家裡最開心的小寶貝。"},
+  brave:{emoji:"🐕‍🦺",img:IMG.gsd,name:"勇士",sub:"德國狼犬 · 警犬 · 服役 2015–2021",ownerName:"士林分局",
+    inst:true,species:"dog",born:2013,died:2023,loc:[25.0878,121.5260],dist:"900 m",appear:{from:9,to:18,label:"白天"},
+    text:"勇士是士林分局的緝毒與巡邏犬，服役六年。牠總是走在員警前面，鼻子貼著地面，尾巴挺得直直的。牠協助偵破過數十起案件，也在無數個深夜陪著巡邏的員警走過空蕩的街。2021 年光榮退役，2023 年在照顧牠的訓練士家中安詳離世。",
+    quote:"「有些英雄，是用四隻腳站在我們前面的。」",
+    like:"出勤前的口令、找到目標時的那顆獎勵球、退役後終於能睡到自然醒的午後。",
+    habit:"聽到警笛會立刻豎起耳朵；訓練士的手勢一個都不會錯；退役後最愛趴在分局門口看人來人往。",
+    range:"服役於士林一帶，退役後常在捷運士林站周邊廣場散步，是很多通勤族認得的老朋友。",
+    place:"捷運士林站 · 站前廣場",
+    placeDesc:"退役後的勇士常在站前廣場曬太陽，看著人潮來去。牠走後，分局在這裡立了一面小小的紀念牌。如果你經過，可以向這位守護過這座城市的夥伴，說聲謝謝。",
+    owner:"謝謝你記得牠。勇士服役六年，是我們最信賴的夥伴。願牠在那邊不用再值勤，好好睡。—— 士林分局全體",
+    flower:512,met:2380,save:301,
+    honor:{unit:"士林分局 K9 隊",years:"2015–2021 · 服役 6 年",cases:"協助偵破 47 起案件",award:"警犬楷模獎",status:"2021 光榮退役 · 2023 安詳離世"},
+    kid:"勇士是一隻超級勇敢的警察狗狗。牠的鼻子好厲害，會幫警察叔叔找到壞人藏起來的東西，保護大家的安全。牠是真正的英雄喔！"}
 };
 
 /* 我的位置（士林市區） + 未解鎖地點（走近才解鎖 · §10 接近解鎖機制） */
@@ -731,6 +753,12 @@ const ROLES={
   C :{icon:"🎖️",name:"榮譽夥伴",tag:"公共服務",desc:"機關的公共服務動物（警犬／導盲犬…）",inst:true}
 };
 const ROLE_ORDER=["A1","A2","A3","B","C"];
+/* 依寵物類型調整互動語彙：紀念→獻花、在世→祝福、榮譽→致敬 */
+const MODEUI={
+  memorial:{fIc:"🌼",fLb:"送花",sLb:"收藏",mLb:"已遇見",mF:"🌼 收到的花",mM:"👣 遇見的人",mS:"🔖 被收藏",fToast:"你替牠獻上了一朵花 🌼",mToast:"已記錄「遇見」👣 主人會知道又有人記得牠"},
+  living:{fIc:"🌟",fLb:"送祝福",sLb:"關注",mLb:"打招呼",mF:"🌟 收到的祝福",mM:"👋 打過招呼",mS:"🔖 被關注",fToast:"你為牠送上一份祝福 🌟",mToast:"你跟牠打了聲招呼 👋"},
+  honor:{fIc:"🎖️",fLb:"致敬",sLb:"收藏",mLb:"已致意",mF:"🎖️ 收到的致敬",mM:"🫡 致意人次",mS:"🔖 被收藏",fToast:"你向牠致上敬意 🎖️",mToast:"已向這位夥伴致意 🫡"}
+};
 function resetProgress(){if(confirm('清除你在這個 demo 的所有互動與解鎖紀錄？')){localStorage.removeItem(SKEY);location.reload();}}
 
 /* 地圖上出現的三隻主角 + 收藏冊裡「先前已遇見」的寵物 */
@@ -776,21 +804,42 @@ function refreshAppearance(){
   MARKERS.forEach(o=>{
     if(o.locked&&!ST.unlocked[o.key])return;           // 仍上鎖：保留鎖頭圖示
     const id=o.petId||o.id;const p=PETS[id];if(!p)return;
-    o.m.setIcon(pinIcon(p.img,p.emoji,false,!apStatus(p).active));
+    o.m.setIcon(pinIcon(p.img,p.emoji,false,!apStatus(p).active,o.type||petType(p)));
   });
   renderToday();renderNearby();
   if(cur&&document.getElementById('s-story').classList.contains('active'))setAppearInfo(cur);
 }
 function setAppearInfo(id){const p=PETS[id],el=document.getElementById('appearInfo');if(!el)return;
-  if(p.living){el.className='appear-line rest';el.textContent='🌱 私密建檔中 · 未公開地點，僅你可見';return;}
   const st=apStatus(p);
   el.className='appear-line '+(st.active?'live':'rest');
   el.textContent=(st.active?'🟢 現在出沒中':'💤 現在不在這裡')+' · 通常在 '+apRange(p)+' 出沒';
 }
+function applyModeUI(p){const u=MODEUI[petType(p)];
+  $('actFlower').querySelector('.ic').textContent=u.fIc;
+  $('actFlower').querySelector('.lb').textContent=u.fLb;
+  $('actSave').querySelector('.lb').textContent=u.sLb;
+  $('actMet').querySelector('.lb').textContent=u.mLb;
+  const ml=document.querySelectorAll('.metrics .metric .l');
+  ml[0].textContent=u.mF; ml[1].textContent=u.mM; ml[2].textContent=u.mS;
+}
+function renderLayerMeter(p){const el=$('layerMeter');if(!el)return;
+  if(p.inst){el.style.display='none';return;} el.style.display='flex';
+  const r=ROLES[ST.role], unlocked=(r&&r.owner)?4:2;
+  const layers=[['🌍','公開層'],['📖','完整故事'],['👨‍👩‍👧','家族層'],['🔒','私密層']];
+  el.innerHTML=layers.map((L,i)=>`<div class="lchip ${i<unlocked?'on':''}">${i<unlocked?L[0]:'🔒'} ${L[1]}</div>`).join('');
+}
 
 /* ---------- 使用者分級 · 私密陪伴視圖 ---------- */
+function updateStoryBanner(p){const lb=$('livingBanner');const rOwner=ROLES[ST.role]&&ROLES[ST.role].owner;
+  if(p.living){lb.style.display='block';lb.className='living-banner';
+    lb.innerHTML=rOwner?`🌱 <b>生前守候</b> · 你正在為還在身邊的${p.name}做私密建檔；公開地圖上，大家只會看到牠開心的樣子。`
+      :`🌱 <b>這孩子還在世</b> · 由主人持續記錄中，你可以送上祝福幫牠加油；完整私密日記只留給家人。`;
+  }else if(p.inst){lb.style.display='block';lb.className='living-banner honor';
+    lb.innerHTML=`🎖️ <b>公共服務榮譽</b> · 由 ${p.ownerName} 提供 · 讓大家一起記得這位守護者。`;
+  }else{lb.style.display='none';lb.className='living-banner';}
+}
 function renderRoleView(id){
-  const p=PETS[id];
+  const p=PETS[id];updateStoryBanner(p);
   const privHTML=`<div class="pcard priv"><div class="ph4">🔒 私密陪伴（僅摯親可見）</div>
       <div class="prow"><div class="pk">📔</div><div class="pv"><b>完整私密故事・主人日記</b><br><span>寫給自己與家人、不公開的那一面</span></div></div>
       <div class="prow"><div class="pk">🖼️</div><div class="pv"><b>私人相簿・影片</b> <span>· 24 張照片 / 3 支影片</span></div></div>
@@ -807,27 +856,27 @@ function renderRoleView(id){
       <div class="prow"><div class="pk">🎞️</div><div class="pv"><b>年度紀念內容</b><br><span>忌日／生日自動生成紀念短片・每年專人協助更新一次故事</span></div></div>
       <div class="prow"><div class="pk">✨</div><div class="pv"><b>IP／兒童改編優先</b><br><span>優先進入 YouTube 內容池與兒童故事、角色圖優先產製</span></div></div>
       <button class="pbtn" onclick="openTombSheet('${id}')" style="background:#5a6f7a">🔗 開啟塔位現場連動</button></div>`;
-  const honorHTML=`<div class="pcard honor"><div class="ph4">🎖️ 榮譽夥伴（公共服務動物）</div>
-      <div class="prow"><div class="pk">🏅</div><div class="pv"><b>公開榮譽頁</b><br><span>服役紀錄・退役／殉職紀念，讓大眾一起記得</span></div></div>
-      <div class="prow"><div class="pk">🧸</div><div class="pv"><b>IP 化與生命教育</b><br><span>做成角色與兒童內容，適合公益故事</span></div></div>
-      <div class="prow"><div class="pk">🕊️</div><div class="pv"><b>協助料理後事</b> <span>· 由機關授權，平台協辦</span></div></div></div>`;
   const guardHTML=`<div class="locknote"><span class="li">🤍</span><div>你以<b>守護者</b>身分陪伴這隻寵物：可以送花、收藏、記錄遇見，並成為牠的守護者。<br>完整私密故事與相簿，只保留給牠真正的家人。</div></div>`;
-  // 在世寵物：只有本人可見，固定顯示生前守候，不可切換身分
-  if(p.living){
-    $('roleBar').innerHTML=`<span class="ricon">🌱</span><div class="rmain"><b>生前守候（你）</b><div class="rd">只有你看得到 · 生前私密建檔</div></div>`;
-    $('rolePanel').innerHTML=privHTML+preneedHTML;return;
+  const livingPubHTML=`<div class="locknote"><span class="li">🌱</span><div>這孩子<b>還在世</b>，你可以送上祝福、幫牠加油。<br>牠完整的私密日記與相簿，留給真正的家人。</div></div>`;
+  const H=p.honor||{};
+  const honorHTML=`<div class="pcard honor"><div class="ph4">🎖️ 榮譽夥伴（公共服務動物）</div>
+      <div class="prow"><div class="pk">🏛️</div><div class="pv"><b>${H.unit||''}</b><br><span>${H.years||''}</span></div></div>
+      <div class="prow"><div class="pk">🥇</div><div class="pv"><b>${H.cases||''}</b> <span>· ${H.award||''}</span></div></div>
+      <div class="prow"><div class="pk">🎗️</div><div class="pv"><b>${H.status||''}</b></div></div>
+      <div class="prow"><div class="pk">🫡</div><div class="pv"><b>公開榮譽榜</b><br><span>${(p.flower+(ST.flowers[id]?1:0)).toLocaleString()} 次致敬 · ${p.met.toLocaleString()} 人向牠致意</span></div></div></div>`;
+  // 榮譽夥伴：本質公開，固定顯示、不切換身分
+  if(p.inst){
+    $('roleBar').innerHTML=`<span class="ricon">🎖️</span><div class="rmain"><b>榮譽夥伴 · 公共服務</b><div class="rd">由 ${p.ownerName} 提供 · 大眾公開紀念</div></div>`;
+    $('rolePanel').innerHTML=honorHTML;renderLayerMeter(p);return;
   }
   const r=ROLES[ST.role];
   $('roleBar').innerHTML=`<span class="ricon">${r.icon}</span>
     <div class="rmain"><b>以「${r.name}」身分查看</b><div class="rd">${r.desc}</div></div>
     <span class="rswap">切換 ▾</span>`;
   let h='';
-  if(r.owner)h+=privHTML;
-  if(r.tomb)h+=tombHTML;
-  if(r.preneed)h+=preneedHTML;
-  if(r.inst)h+=honorHTML;
-  if(!r.owner&&!r.inst)h+=guardHTML;
-  $('rolePanel').innerHTML=h;
+  if(r.owner){ h+=privHTML; if(p.living)h+=preneedHTML; if(r.tomb)h+=tombHTML; }
+  else { h+= p.living?livingPubHTML:guardHTML; }
+  $('rolePanel').innerHTML=h;renderLayerMeter(p);
 }
 /* 塔位現場連動：QR + 實體獻花連動 + 現地解鎖私密留言 */
 function qrSVG(seed){
@@ -869,7 +918,7 @@ function walkToTomb(id){const btn=$('tombBtn');btn.disabled=true;btn.textContent
   },110);
 }
 function openRoleSheet(){
-  if(cur&&PETS[cur].living){toast('生前私密建檔僅本人可見，無法切換身分');return;}
+  if(cur&&PETS[cur].inst){toast('榮譽夥伴為公開紀念，無需切換身分');return;}
   $('sheet').innerHTML=`<div class="grip"></div>
     <h3>以哪種身分查看這隻寵物？</h3>
     <div class="stipe">同一個人，對不同寵物可以是不同身分</div>
@@ -903,11 +952,9 @@ function openStory(id){
   $('actMet').classList.toggle('done',!!ST.mets[id]);
   $('gName').textContent=p.name; updateGuardianUI(id,p);
   setAppearInfo(id); renderRoleView(id);
-  const lb=$('livingBanner');
+  applyModeUI(p);
   document.getElementById('s-story').classList.toggle('living',!!p.living);
-  if(p.living){lb.style.display='block';lb.innerHTML=`🌱 <b>生前私密建檔</b> · ${p.name}還在你身邊，這一頁只有你看得到，也還沒公開上地圖。`;}
-  else lb.style.display='none';
-  $('placeSafety').style.display=p.living?'none':'';
+  $('placeSafety').style.display='';
   $('headTitle').textContent=p.name+" 的故事";
   $('headSub').textContent="真實生命 · 數位記憶";
   go('story');
@@ -958,14 +1005,14 @@ function toggleGuardian(){
 /* ---------- interactions（持久化） ---------- */
 function doFlower(){if(ST.flowers[cur])return;ST.flowers[cur]=true;persist();
   const v=PETS[cur].flower+1;$('ctFlower').textContent=$('mFlower').textContent=v;
-  $('actFlower').classList.add('done');flowerRain();toast('你替牠獻上了一朵花 🌼');}
+  $('actFlower').classList.add('done');flowerRain();toast(MODEUI[petType(PETS[cur])].fToast);}
 function doSave(){const on=!ST.saves[cur];if(on)ST.saves[cur]=true;else delete ST.saves[cur];persist();
   const v=PETS[cur].save+(on?1:0);$('ctSave').textContent=$('mSave').textContent=v;
   $('actSave').classList.toggle('done',on);renderCollect();toast(on?'已收藏到你的記憶冊 🔖':'已取消收藏');}
 function doMet(){if(ST.mets[cur])return;ST.mets[cur]=true;persist();
   const v=PETS[cur].met+1;$('ctMet').textContent=v;$('mMet').textContent=v.toLocaleString();
   $('actMet').classList.add('done');renderTimeline(PETS[cur]);renderCollect();
-  toast('已記錄「遇見」👣 主人會知道又有人記得牠');}
+  toast(MODEUI[petType(PETS[cur])].mToast);}
 
 /* ---------- 接近解鎖（§10 出沒規則：接近後解鎖） ---------- */
 function openLockSheet(key){
@@ -1018,20 +1065,24 @@ function reviewDone(btn,msg){const card=btn.closest('.review-card');card.style.t
 
 /* ---------- map (Leaflet + OpenStreetMap · 台北市士林區) ---------- */
 let MAP,MARKERS=[],MARKERS_MAP={};
-function pinIcon(url,emoji,locked,dormant){
+function petType(p){return p.living?'living':p.inst?'honor':'memorial';}
+function pinIcon(url,emoji,locked,dormant,type){
+  const t=(type&&type!=='memorial')?' '+type:'';
+  const badge=type==='living'?'<div class="tag">🌱</div>':type==='honor'?'<div class="tag">🎖️</div>':'';
   return L.divIcon({className:'',iconSize:[50,60],iconAnchor:[25,56],
-    html:`<div class="pin${locked?' locked':''}${dormant?' dormant':''}">${(locked||dormant)?'':'<div class="pulse"></div>'}<div class="bubble">${avaHTML(url,emoji)}${locked?'<div class="lk">🔒</div>':''}</div>${dormant?'<div class="zzz">💤</div>':''}</div>`});
+    html:`<div class="pin${locked?' locked':''}${dormant?' dormant':''}${t}">${(locked||dormant)?'':'<div class="pulse"></div>'}<div class="bubble">${avaHTML(url,emoji)}${locked?'<div class="lk">🔒</div>':''}</div>${dormant?'<div class="zzz">💤</div>':badge}</div>`});
 }
+const ONMAP=['mochi','luna','coco','haru','brave'];
 function initMap(){
   MAP=L.map('map',{zoomControl:false,scrollWheelZoom:false,attributionControl:true}).setView(ME,14);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(MAP);
   L.marker(ME,{icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],html:'<div class="me-pin"></div>'})}).addTo(MAP);
   const bounds=[ME];
-  // 三隻主角（已解鎖）
-  FEATURED.forEach(id=>{const p=PETS[id];const sp=p.species||(p.emoji==='🐱'?'cat':'dog');
-    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false,!apStatus(p).active)}).addTo(MAP).on('click',()=>openStory(id));
-    MARKERS.push({m,species:sp,today:true,id});bounds.push(p.loc);});
-  // 未解鎖地點（走近才解鎖）— 若已解鎖則以正常標記顯示
+  // 所有寵物都在公開地圖（紀念 / 在世 / 榮譽 各有識別）
+  ONMAP.forEach(id=>{const p=PETS[id];const sp=p.species||(p.emoji==='🐱'?'cat':'dog');const tp=petType(p);
+    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false,!apStatus(p).active,tp)}).addTo(MAP).on('click',()=>openStory(id));
+    MARKERS.push({m,species:sp,today:true,id,type:tp});bounds.push(p.loc);});
+  // 未解鎖地點（走近才解鎖）
   Object.keys(LOCKED).forEach(key=>{const l=LOCKED[key],p=PETS[l.petId],un=!!ST.unlocked[key];
     const m=L.marker(l.loc,{icon:pinIcon(un?p.img:l.img,un?p.emoji:l.emoji, un?!apStatus(p).active:true)}).addTo(MAP);
     m.on('click',()=> un?openStory(l.petId):openLockSheet(key));
@@ -1050,7 +1101,7 @@ function fillDataImg(){document.querySelectorAll('[data-img]').forEach(el=>{
   el.innerHTML=avaHTML(IMG[el.dataset.img],el.dataset.fb);});}
 function renderToday(){
   const box=document.getElementById('todayCards');
-  const items=["luna","mochi","coco"].map(id=>({id,active:apStatus(PETS[id]).active}));
+  const items=["brave","luna","haru","mochi","coco"].map(id=>({id,active:apStatus(PETS[id]).active}));
   items.sort((a,b)=>(b.active?1:0)-(a.active?1:0));
   const liveN=items.filter(x=>x.active).length;
   const sub=document.getElementById('tsSub');
@@ -1065,7 +1116,7 @@ function renderToday(){
 }
 function renderNearby(){
   const box=document.getElementById('nearbyList');
-  const rows=[{id:"luna"},{id:"mochi"},{id:"coco"},
+  const rows=[{id:"brave"},{id:"luna"},{id:"haru"},{id:"mochi"},{id:"coco"},
     ST.unlocked.l1?{id:"charlie"}:{lock:"l1"}];
   box.innerHTML=rows.map(r=>{
     if(r.lock){const l=LOCKED[r.lock];
@@ -1080,7 +1131,7 @@ function renderNearby(){
       <div class="body"><div class="nm">${p.name}</div><div class="meta">${p.sub.split(' · ').slice(0,2).join(' · ')}</div>
       <div class="place">📍 ${p.place.split(' · ')[0]}</div>
       <div class="stdot ${st.active?'live':'rest'}">${st.active?'🟢 出沒中':'💤 '+apRange(p)}</div></div>
-      <div class="rt"><div class="d">${p.dist}</div><div class="fl">🌼 ${p.flower+(ST.flowers[r.id]?1:0)}</div></div></div>`;
+      <div class="rt"><div class="d">${p.dist}</div><div class="fl">${MODEUI[petType(p)].fIc} ${p.flower+(ST.flowers[r.id]?1:0)}</div></div></div>`;
   }).join('');
 }
 let cfilter='all';
