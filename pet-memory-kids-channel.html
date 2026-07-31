@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>念念・動物朋友 · 兒童內容頻道（§12 模組 A 示意）</title>
+<style>
+  :root{
+    --bg:#f6f1e7;--paper:#fffdf8;--ink:#3d362e;--ink-soft:#7c7267;--line:#e8ddca;
+    --green:#8bab7f;--green-deep:#5f7d55;--gold:#d9a441;--gold-soft:#f3e2b8;--rose:#d98a8a;--lav:#a99cc4;
+    --shadow:0 8px 30px rgba(80,68,50,.14);--shadow-sm:0 3px 12px rgba(80,68,50,.10);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+    background:radial-gradient(1200px 600px at 20% -10%,#efe7d6 0%,transparent 60%),
+      radial-gradient(900px 500px at 120% 20%,#eef2e6 0%,transparent 55%),var(--bg);
+    color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:26px 14px;}
+  .phone{width:100%;max-width:414px;height:min(880px,94vh);background:var(--paper);border-radius:38px;
+    box-shadow:var(--shadow),0 0 0 10px #efe6d4,0 0 0 11px #e2d6bd;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .statusbar{height:34px;flex:0 0 34px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;
+    font-size:12.5px;color:var(--ink-soft);font-weight:600;background:linear-gradient(#fffefb,#fdf9ef);}
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+
+  /* channel head */
+  .chead{padding:16px 16px 14px;background:linear-gradient(160deg,#fbf2dd,#f4ede0);border-bottom:1px solid var(--line);}
+  .chead .top{display:flex;gap:13px;align-items:center;}
+  .chead .avatar{width:60px;height:60px;border-radius:20px;background:radial-gradient(circle at 35% 30%,#fbe9c0,#e5b85e);
+    display:flex;align-items:center;justify-content:center;font-size:32px;box-shadow:var(--shadow-sm);flex:0 0 60px;}
+  .chead .ci{flex:1;min-width:0;}
+  .chead .ci h1{margin:0;font-size:18px;font-weight:900;letter-spacing:.5px;}
+  .chead .ci .sub{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .chead .tagline{font-size:12.5px;color:#5a4f41;margin:12px 2px 0;line-height:1.6;}
+  .chead .btns{display:flex;gap:9px;margin-top:12px;}
+  .chead .btns button{border:none;border-radius:22px;padding:10px 14px;font-size:12.5px;font-weight:800;cursor:pointer;}
+  .btn-sub{background:var(--rose);color:#fff;flex:0 0 auto;}
+  .btn-app{background:var(--green-deep);color:#fff;flex:1;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .principle{margin:12px 16px 0;font-size:10.5px;line-height:1.7;color:var(--green-deep);background:#eef3e8;border:1px solid #d8e3cd;border-radius:12px;padding:9px 11px;}
+  .principle b{color:#4b6640;}
+
+  /* tabs */
+  .tabs{display:flex;gap:8px;padding:14px 16px 4px;position:sticky;top:0;background:var(--paper);z-index:5;}
+  .tab{flex:1;text-align:center;font-size:12px;font-weight:800;padding:9px 4px;border-radius:13px;border:1px solid var(--line);
+    background:#fff;color:var(--ink-soft);cursor:pointer;}
+  .tab.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .sec{display:none;padding:8px 16px 24px;}
+  .sec.on{display:block;}
+  .sec-note{font-size:11px;color:var(--ink-soft);margin:4px 2px 12px;line-height:1.6;}
+
+  /* shorts row (vertical cards) */
+  .shorts{display:flex;gap:12px;overflow-x:auto;padding:2px 0 8px;scroll-snap-type:x mandatory;}
+  .shorts::-webkit-scrollbar{display:none;}
+  .short{flex:0 0 132px;scroll-snap-align:start;cursor:pointer;}
+  .short .th{position:relative;height:210px;border-radius:16px;overflow:hidden;background:#f4eddd;box-shadow:var(--shadow-sm);}
+  .short .th img{width:100%;height:100%;object-fit:cover;}
+  .short .nm{font-size:12px;font-weight:800;margin-top:7px;line-height:1.4;}
+  .short .vw{font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
+
+  /* list cards (16:9) */
+  .vcard{cursor:pointer;margin-bottom:16px;}
+  .vcard .th{position:relative;border-radius:16px;overflow:hidden;background:#f4eddd;box-shadow:var(--shadow-sm);aspect-ratio:16/9;}
+  .vcard .th img{width:100%;height:100%;object-fit:cover;}
+  .vcard .meta{display:flex;gap:11px;margin-top:9px;align-items:flex-start;}
+  .vcard .meta .pa{width:34px;height:34px;border-radius:50%;overflow:hidden;flex:0 0 34px;background:#f4eddd;}
+  .vcard .meta .pa img{width:100%;height:100%;object-fit:cover;}
+  .vcard .meta .mt .vt{font-size:14px;font-weight:800;line-height:1.4;}
+  .vcard .meta .mt .vs{font-size:11px;color:var(--ink-soft);margin-top:3px;}
+
+  .dur{position:absolute;right:7px;bottom:7px;background:rgba(40,33,24,.82);color:#fff;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:8px;}
+  .tag{position:absolute;left:7px;top:7px;font-size:9.5px;font-weight:800;padding:3px 8px;border-radius:12px;}
+  .tag.real{background:rgba(255,253,248,.94);color:var(--green-deep);}
+  .tag.pub{background:rgba(217,164,65,.95);color:#fff;}
+  .tag.live{background:rgba(127,160,111,.95);color:#fff;}
+  .playic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .playic i{width:46px;height:46px;border-radius:50%;background:rgba(255,253,248,.9);display:flex;align-items:center;justify-content:center;
+    font-size:18px;color:var(--ink);box-shadow:var(--shadow);padding-left:3px;}
+
+  /* flow footer */
+  .flow{margin:6px 16px 22px;background:linear-gradient(150deg,#3d362e,#5a4f41);color:#fff;border-radius:18px;padding:16px;}
+  .flow h3{margin:0 0 10px;font-size:13px;font-weight:900;}
+  .flow .chain{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;flex-wrap:wrap;}
+  .flow .chain span{background:rgba(255,255,255,.14);padding:5px 9px;border-radius:20px;}
+  .flow p{font-size:10.5px;opacity:.82;margin:11px 0 0;line-height:1.7;}
+
+  /* player modal */
+  .pmask{position:absolute;inset:0;background:rgba(40,33,24,.55);z-index:40;display:none;align-items:center;justify-content:center;padding:22px;}
+  .pmask.show{display:flex;}
+  .player{width:100%;background:var(--paper);border-radius:22px;overflow:hidden;box-shadow:var(--shadow);transform:translateY(12px);transition:.25s;}
+  .pmask.show .player{transform:none;}
+  .pstage{position:relative;aspect-ratio:16/9;background:#2a2620;}
+  .pstage img{width:100%;height:100%;object-fit:cover;opacity:.62;}
+  .pstage .pbig{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .pstage .pbig i{width:64px;height:64px;border-radius:50%;background:rgba(255,253,248,.92);display:flex;align-items:center;justify-content:center;
+    font-size:26px;color:var(--ink);padding-left:4px;box-shadow:var(--shadow);}
+  .pstage .demo{position:absolute;left:10px;bottom:10px;background:rgba(40,33,24,.78);color:#fff;font-size:10px;font-weight:700;padding:4px 9px;border-radius:10px;}
+  .pstage .pdur{position:absolute;right:10px;bottom:10px;background:rgba(40,33,24,.82);color:#fff;font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:8px;}
+  .pbody{padding:15px 16px 17px;}
+  .pbody .pt{font-size:16px;font-weight:900;}
+  .pbody .ps{font-size:11px;color:var(--ink-soft);margin-top:4px;}
+  .pbody .ptag{display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:12px;margin-top:9px;background:#eef3e8;color:var(--green-deep);}
+  .pbody .pd{font-size:12.5px;color:#4b4339;line-height:1.8;margin:11px 0 0;}
+  .pbody .pcta{margin-top:14px;width:100%;background:var(--green-deep);color:#fff;border:none;border-radius:14px;padding:13px;font-size:13.5px;font-weight:800;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .pbody .pclose{margin-top:9px;width:100%;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px;font-size:12.5px;font-weight:700;color:var(--ink);cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="statusbar"><span>9:41</span><span>念念・動物朋友</span><span>􀛨 􀙇 100%</span></div>
+
+  <div class="scroll">
+    <div class="chead">
+      <div class="top">
+        <div class="avatar">🐾</div>
+        <div class="ci">
+          <h1>念念・動物朋友</h1>
+          <div class="sub">兒童頻道 · 訂閱 12.4 萬 · 128 支影片</div>
+        </div>
+      </div>
+      <div class="tagline">把士林這些真實動物的溫柔，講成孩子聽得懂的故事。看完，一起打開地圖去牠們生活過的地方遇見牠 🌿</div>
+      <div class="btns">
+        <button class="btn-sub" onclick="toast('已訂閱 · 謝謝你 🔔')">🔔 訂閱</button>
+        <a class="btn-app" href="pet-memory-map-demo.html">🗺️ 打開記憶地圖</a>
+      </div>
+    </div>
+    <div class="principle">✅ <b>內容規範（§12.3）</b>：真實故事與改編明確區分 · 不用死亡嚇孩子 · 不過度悲情 · 不把寵物包裝為靈異 · 強調記憶、關係、善意與陪伴。</div>
+
+    <div class="tabs">
+      <div class="tab on" onclick="showTab(this,'shorts')">✨ 短篇 Shorts</div>
+      <div class="tab" onclick="showTab(this,'story')">📖 故事</div>
+      <div class="tab" onclick="showTab(this,'explore')">🗺️ 地圖探索</div>
+    </div>
+
+    <div class="sec on" id="s-shorts">
+      <div class="sec-note">30–60 秒 · 一隻角色、一個情境、一個情緒。</div>
+      <div class="shorts" id="shortsRow"></div>
+    </div>
+    <div class="sec" id="s-story">
+      <div class="sec-note">3–5 分鐘 · 完整但簡單的寵物生命故事。</div>
+      <div id="storyList"></div>
+    </div>
+    <div class="sec" id="s-explore">
+      <div class="sec-note">角色帶你認識一個地方，以及牠在那裡留下的記憶。</div>
+      <div id="exploreList"></div>
+    </div>
+
+    <div class="flow">
+      <h3>🔁 這個頻道在整個產品裡的角色</h3>
+      <div class="chain"><span>📺 YouTube 內容</span>→<span>🐾 角色認知</span>→<span>🗺️ 打開 App</span>→<span>👣 地圖遇見</span>→<span>💛 回流主人</span></div>
+      <p>頻道是「流量層」：先讓孩子與家長認識這些角色，再導流到記憶地圖 App，在牠們真實生活過的地方遇見牠。此頁為 §12 模組 A 的示意，刻意獨立於主 App，且不含實際影片檔（縮圖 + 點擊示意播放），因此不影響地圖 App 的載入與捲動效能。</p>
+    </div>
+  </div>
+
+  <div class="pmask" id="pmask" onclick="closeP(event)">
+    <div class="player" id="player"></div>
+  </div>
+  <div class="toast" id="toast" style="position:absolute;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;padding:10px 18px;border-radius:22px;opacity:0;pointer-events:none;transition:.3s;z-index:60;box-shadow:var(--shadow);"></div>
+</div>
+
+<script>
+const WM=p=>`https://upload.wikimedia.org/wikipedia/commons/thumb/${p}`;
+const IMG={
+  shiba:WM("3/3c/A_Shiba_Inu.jpg/500px-A_Shiba_Inu.jpg"),
+  shiba2:WM("5/58/Shiba_inu_taiki.jpg/500px-Shiba_inu_taiki.jpg"),
+  golden:WM("1/1c/Golden_Retriever_with_a_stick_%28Barras%29.jpg/500px-Golden_Retriever_with_a_stick_%28Barras%29.jpg"),
+  calico:WM("0/01/Calico_cat%2C_-_Assisi%2C_Italy.jpg/500px-Calico_cat%2C_-_Assisi%2C_Italy.jpg"),
+  white:WM("6/69/June_odd-eyed-cat_cropped.jpg/500px-June_odd-eyed-cat_cropped.jpg"),
+  ginger:WM("b/bb/Ginger_cat_on_the_street.jpg/500px-Ginger_cat_on_the_street.jpg"),
+  tabby:WM("4/4d/Cat_November_2010-1a.jpg/500px-Cat_November_2010-1a.jpg"),
+  gsd:WM("7/79/Police_Dog_at_Toronto_Open_House_03.jpg/500px-Police_Dog_at_Toronto_Open_House_03.jpg"),
+  corgi:WM("d/dc/Corgi_Puppy.jpg/500px-Corgi_Puppy.jpg")
+};
+function TAG(t){return t==='公益故事'?'pub':t==='在世 · 陪伴中'?'live':'real';}
+
+const SHORTS=[
+  {img:IMG.shiba,dur:"0:45",title:"麻糬的搖尾巴早安",views:"12 萬",tag:"改編自真實故事",pet:"麻糬",desc:"清晨的河邊，麻糬對每一個經過的人搖尾巴說早安。一個情境、一個溫暖的情緒。"},
+  {img:IMG.corgi,dur:"0:52",title:"小春追尾巴大挑戰",views:"21 萬",tag:"在世 · 陪伴中",pet:"小春",desc:"腿短短的柯基小春，今天又跟自己的尾巴玩了一整圈！牠現在健健康康的喔。"},
+  {img:IMG.calico,dur:"0:38",title:"露娜的傍晚巡邏",views:"9.1 萬",tag:"改編自真實故事",pet:"露娜",desc:"傍晚五點，露娜準時坐上矮牆，看小朋友一個一個放學回家。"},
+  {img:IMG.ginger,dur:"0:41",title:"橘子等麵包出爐",views:"7.6 萬",tag:"改編自真實故事",pet:"橘子",desc:"麵包一出爐，橘子就坐得整整齊齊，好像在幫忙招呼客人。"},
+  {img:IMG.shiba2,dur:"0:33",title:"豆豆的樹枝有多長",views:"14 萬",tag:"改編自真實故事",pet:"豆豆",desc:"豆豆撿到一根比自己還長的樹枝，得意地叼著跑一整圈。"}
+];
+const STORY=[
+  {img:IMG.shiba,dur:"4:12",title:"麻糬與河邊的第三張長椅",views:"32 萬",tag:"改編自真實故事",pet:"麻糬",desc:"一隻柴犬和主人，在百齡河濱的長椅上一起看了十二年的日出。溫柔、不悲情的完整生命故事。"},
+  {img:IMG.gsd,dur:"5:00",title:"勇士，用四隻腳的英雄",views:"58 萬",tag:"公益故事",pet:"勇士",desc:"退役警犬勇士服役六年、保護大家的故事——適合生命教育，也帶孩子學會對牠說聲謝謝。"},
+  {img:IMG.calico,dur:"3:48",title:"露娜選了這條街",views:"18 萬",tag:"改編自真實故事",pet:"露娜",desc:"下雨的傍晚，露娜自己選了福林路的這戶人家，住了九年，成了整條街的溫柔。"},
+  {img:IMG.tabby,dur:"4:30",title:"咪咪陪爺爺的十四年",views:"27 萬",tag:"改編自真實故事",pet:"咪咪",desc:"天母公園裡，一隻老貓陪一位獨居爺爺走過十四年的故事。關於陪伴，也關於家人。"}
+];
+const EXPLORE=[
+  {img:IMG.golden,dur:"3:20",title:"拿鐵帶你逛天母大草坪",views:"11 萬",tag:"地圖探索系列",pet:"拿鐵",desc:"跟著拿鐵認識天母運動公園的大草坪，以及牠在這裡迎風奔跑、留下的記憶。"},
+  {img:IMG.white,dur:"2:55",title:"棉花的士林夜市夜遊",views:"16 萬",tag:"地圖探索系列",pet:"棉花",desc:"夜市之貓棉花，帶你逛慈諴宮的廟埕與熱鬧的攤販騎樓。"},
+  {img:IMG.shiba2,dur:"3:05",title:"豆豆的百齡河濱撿樹枝之旅",views:"8.9 萬",tag:"地圖探索系列",pet:"豆豆",desc:"豆豆帶你沿著百齡左岸河濱跑一圈，看牠最愛的撿樹枝寶庫。"}
+];
+
+function cardShort(v,i){return `<div class="short" onclick="play('SHORTS',${i})">
+  <div class="th"><img loading="lazy" src="${v.img}" alt="">
+    <span class="tag ${TAG(v.tag)}">${v.tag.split(' · ')[0]}</span>
+    <span class="dur">${v.dur}</span>
+    <span class="playic"><i>▶</i></span></div>
+  <div class="nm">${v.title}</div><div class="vw">${v.views}次觀看</div></div>`;}
+function cardList(v,arr,i){return `<div class="vcard" onclick="play('${arr}',${i})">
+  <div class="th"><img loading="lazy" src="${v.img}" alt="">
+    <span class="tag ${TAG(v.tag)}">${v.tag}</span>
+    <span class="dur">${v.dur}</span>
+    <span class="playic"><i>▶</i></span></div>
+  <div class="meta"><div class="pa"><img loading="lazy" src="${v.img}" alt=""></div>
+    <div class="mt"><div class="vt">${v.title}</div><div class="vs">念念・動物朋友 · ${v.views}次觀看 · ${v.pet}</div></div></div></div>`;}
+
+document.getElementById('shortsRow').innerHTML=SHORTS.map(cardShort).join('');
+document.getElementById('storyList').innerHTML=STORY.map((v,i)=>cardList(v,'STORY',i)).join('');
+document.getElementById('exploreList').innerHTML=EXPLORE.map((v,i)=>cardList(v,'EXPLORE',i)).join('');
+
+const DATA={SHORTS,STORY,EXPLORE};
+function showTab(el,k){el.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));document.getElementById('s-'+k).classList.add('on');}
+function play(arr,i){const v=DATA[arr][i];
+  document.getElementById('player').innerHTML=`
+    <div class="pstage"><img src="${v.img}" alt="">
+      <div class="pbig"><i>▶</i></div>
+      <div class="demo">▶ 示意影片 · demo 不含實際影片檔</div>
+      <div class="pdur">${v.dur}</div></div>
+    <div class="pbody">
+      <div class="pt">${v.title}</div>
+      <div class="ps">念念・動物朋友 · ${v.views}次觀看</div>
+      <span class="ptag">${v.tag}</span>
+      <div class="pd">${v.desc||''}</div>
+      <a class="pcta" href="pet-memory-map-demo.html">🗺️ 在地圖上遇見 ${v.pet} →</a>
+      <button class="pclose" onclick="closeP()">關閉</button>
+    </div>`;
+  document.getElementById('pmask').classList.add('show');
+}
+function closeP(e){if(!e||e.target.id==='pmask')document.getElementById('pmask').classList.remove('show');}
+let tt;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.style.opacity=1;t.style.transform='translateX(-50%) translateY(0)';
+  clearTimeout(tt);tt=setTimeout(()=>{t.style.opacity=0;t.style.transform='translateX(-50%) translateY(20px)';},1800);}
+</script>
+</body>
+</html>
