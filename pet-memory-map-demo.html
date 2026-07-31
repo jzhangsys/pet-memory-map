@@ -353,6 +353,20 @@
   .photopick .pp img{width:100%;height:100%;object-fit:cover;}
   .photopick .pp.sel{border-color:var(--gold);box-shadow:var(--shadow-sm);}
   .sec-sub{font-size:11px;color:var(--ink-soft);text-align:center;margin:16px 0 10px;font-weight:700;}
+  .mprow{display:flex;gap:11px;align-items:center;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:9px;box-shadow:var(--shadow-sm);}
+  .mprow .ava{width:46px;height:46px;border-radius:12px;flex:0 0 46px;}
+  .mprow .ava .fb{font-size:24px;}
+  .mprow .b{flex:1;min-width:0;}
+  .mprow .b .nm{font-size:13.5px;font-weight:800;}
+  .mprow .b .meta{font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
+  .mprow .acts{display:flex;gap:6px;flex:0 0 auto;}
+  .mprow .a2{font-size:11px;font-weight:800;cursor:pointer;border:1px solid var(--line);border-radius:10px;padding:6px 9px;background:#fff;color:var(--green-deep);}
+  .mprow .a2.del{color:#b85757;border-color:var(--rose-soft);}
+  .mp-badge{font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:20px;margin-left:6px;vertical-align:middle;}
+  .mp-badge.draft{background:#efeadd;color:#8a7d63;}
+  .mp-badge.pending{background:var(--gold-soft);color:#a5741a;}
+  .mp-badge.live{background:#e3eddd;color:var(--green-deep);}
+  .mp-empty{text-align:center;font-size:11.5px;color:var(--ink-soft);padding:22px 0;}
   .review-card .badge.mine{background:#e7efdf;color:var(--green-deep);}
   .check-list li b.wait{color:var(--gold);}
   .check-list li b.risk{color:#b85757;}
@@ -534,8 +548,21 @@
 
     <!-- 5. CREATE -->
     <section class="screen" id="s-create">
-      <div class="pad">
-        <div class="section-title" style="margin-top:4px">🐾 為牠建立一頁記憶</div>
+      <div class="pad" id="myPetsView">
+        <div class="section-title" style="margin-top:4px">🐾 我的寵物</div>
+        <div class="filterrow" id="myPetsFilter">
+          <div class="chip on" onclick="setMyFilter(this,'all')">全部</div>
+          <div class="chip" onclick="setMyFilter(this,'draft')">🗂️ 草稿</div>
+          <div class="chip" onclick="setMyFilter(this,'pending')">🕑 審核中</div>
+          <div class="chip" onclick="setMyFilter(this,'live')">✅ 已上架</div>
+        </div>
+        <div id="myPetsList"></div>
+        <button class="primary-btn" onclick="newPet()">➕ 建立新的一頁記憶</button>
+        <div class="note">你的每一隻寵物都在這裡管理：草稿可以繼續編輯，審核中可到後台查看，已上架可直接開牠的故事頁。</div>
+      </div>
+      <div class="pad" id="createForm" style="display:none">
+        <div class="back" onclick="showMyPets()" style="padding:2px 0 6px">‹ 我的寵物</div>
+        <div class="section-title" style="margin-top:0" id="createTitle">🐾 為牠建立一頁記憶</div>
         <div class="photo-up" onclick="toast('（Demo）真實版會開相簿上傳；此處請於下方選一張代表照片')"><div class="big">📷</div>上傳寵物照片<br><span style="font-size:10.5px">Demo：請在下方挑一張代表照片</span></div>
         <div class="photopick" id="photoPick"></div>
         <div style="height:12px"></div>
@@ -574,7 +601,7 @@
         <div class="toggle-row"><div><div class="tt">作為公益故事</div><div class="td">參與動物關懷主題</div></div><div class="sw" onclick="tog(this)"><i></i></div></div>
         </div>
         <button class="primary-btn" onclick="submitPet()">送出審核 · 建立記憶頁</button>
-        <button class="ghost-btn" onclick="toast('已存為私人草稿')">先存成私人草稿</button>
+        <button class="ghost-btn" onclick="saveDraft()">先存成私人草稿</button>
         <div class="note">送出後會經過內容與地點安全審核（§11.6），通過才會出現在地圖上。你隨時可以修改公開範圍。</div>
       </div>
     </section>
@@ -840,7 +867,7 @@ const LOCKED={
 const SKEY='pmm_v1';
 let ST=(()=>{try{return JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){return{}}})();
 ['flowers','saves','mets','guardians','unlocked','tomb','viewsToday','famWall'].forEach(k=>ST[k]=ST[k]||{});
-ST.pending=ST.pending||[]; ST.userPets=ST.userPets||[];
+ST.pending=ST.pending||[]; ST.userPets=ST.userPets||[]; ST.drafts=ST.drafts||[];
 if(!ST.role)ST.role='B';
 function persist(){try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}}
 
@@ -908,6 +935,7 @@ function go(s){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.s===s));
   if(titles[s]){document.getElementById('headTitle').textContent=titles[s][0];document.getElementById('headSub').textContent=titles[s][1];}
   document.getElementById('scrollArea').scrollTop=0;
+  if(s==='create')showMyPets();
 }
 
 /* ---------- 出沒時段 (§10.3 出沒時間 + 基本時間條件) ---------- */
@@ -1251,22 +1279,23 @@ function renderPhotoPick(){const el=document.getElementById('photoPick');if(!el)
   el.innerHTML=PHOTO_OPTS.map((o,i)=>`<div class="pp${i===0?' sel':''}" data-k="${o[0]}" onclick="pickPhoto(this)"><img loading="lazy" src="${IMG[o[0]]}" alt=""></div>`).join('');}
 function pickPhoto(el){el.parentElement.querySelectorAll('.pp').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');}
 function val(id){const e=document.getElementById(id);return e?e.value.trim():'';}
-function submitPet(){
+let editingId=null, myFilter='all';
+function buildPetFromForm(id){
   const name=val('petName')||'新朋友';
   const sp=document.getElementById('petSpecies').value.indexOf('貓')>=0?'cat':'dog';
   const breed=val('petBreed')||(sp==='cat'?'米克斯貓':'米克斯犬');
   const born=parseInt(val('petBorn'))||null, died=parseInt(val('petDied'))||null;
   const oneline=val('petOneline'), story=val('petStory');
   const placeEl=document.querySelector('#placeCards .radio-card.sel');
+  const placeIdx=[...document.querySelectorAll('#placeCards .radio-card')].indexOf(placeEl);
   const identity=((document.querySelector('#identityCards .radio-card.sel')||{}).dataset||{}).id||'A2';
   const photoK=((document.querySelector('#photoPick .pp.sel')||{}).dataset||{}).k||(sp==='cat'?'calico':'shiba');
-  const sws=document.querySelectorAll('#createToggles .sw');
-  const kidsOK=sws[2]&&sws[2].classList.contains('on');
+  const tog=[...document.querySelectorAll('#createToggles .sw')].map(s=>s.classList.contains('on'));
   const placeSafe=placeEl.dataset.safe==='1';
   const living=!died||identity==='A3';
   const loc=placeEl.dataset.loc.split(',').map(Number);
-  const p={id:'u'+Date.now(),name,species:sp,emoji:sp==='cat'?'🐱':'🐶',img:IMG[photoK],
-    breed,born,died,living,identity,placeSafe,kidsOK,submitAgo:'剛剛',
+  return {id,name,species:sp,emoji:sp==='cat'?'🐱':'🐶',img:IMG[photoK],
+    breed,born,died,living,identity,placeSafe,kidsOK:tog[2],submitAgo:'剛剛',
     sub:`${breed} · ${born||'—'}${living?'– · 陪伴中':'–'+(died||'')}`,
     ownerName:'你',loc,dist:'—',appear:{from:8,to:18,label:'白天'},
     text:story||`${name}的故事，主人正在慢慢補充中。`,
@@ -1274,9 +1303,58 @@ function submitPet(){
     like:'（主人正在慢慢補充中…）',habit:'（主人正在慢慢補充中…）',range:placeEl.dataset.pname,
     place:placeEl.dataset.pname+' · 公開記憶地點',
     placeDesc:`這是 ${name} 的公開記憶地點：${placeEl.dataset.pname}。`,
-    owner:oneline||'謝謝你來認識牠。',flower:0,met:0,save:0};
+    owner:oneline||'謝謝你來認識牠。',flower:0,met:0,save:0,
+    form:{name,species:sp,breed,born:born||'',died:died||'',oneline,story,photoK,placeIdx,identity,tog}};
+}
+function submitPet(){
+  const p=buildPetFromForm('u'+Date.now());
+  if(editingId){const di=ST.drafts.findIndex(d=>d.id===editingId);if(di>=0)ST.drafts.splice(di,1);editingId=null;}
   ST.pending.push(p);persist();renderPending();
   toast('已送出審核 ✅ 前往後台查看');setTimeout(()=>go('admin'),700);
+}
+function saveDraft(){
+  const id=editingId||('d'+Date.now());
+  const p=buildPetFromForm(id);
+  const di=ST.drafts.findIndex(d=>d.id===id);
+  if(di>=0)ST.drafts[di]=p; else ST.drafts.push(p);
+  persist();editingId=null;toast('已存成私人草稿 🗂️');showMyPets();
+}
+/* ---- 我的寵物列表（草稿／審核中／已上架） ---- */
+function showMyPets(){document.getElementById('myPetsView').style.display='';document.getElementById('createForm').style.display='none';renderMyPets();document.getElementById('scrollArea').scrollTop=0;}
+function showForm(title){document.getElementById('createTitle').innerHTML=title;document.getElementById('myPetsView').style.display='none';document.getElementById('createForm').style.display='';document.getElementById('scrollArea').scrollTop=0;}
+function newPet(){editingId=null;resetForm();showForm('🐾 為牠建立一頁記憶');}
+function editDraft(id){const d=ST.drafts.find(x=>x.id===id);if(!d)return;editingId=id;setForm(d);showForm('✏️ 編輯草稿');}
+function deleteDraft(id){const i=ST.drafts.findIndex(x=>x.id===id);if(i<0)return;ST.drafts.splice(i,1);persist();renderMyPets();toast('已刪除草稿');}
+function setMyFilter(el,f){el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');myFilter=f;renderMyPets();}
+function setForm(p){const f=p.form||{};
+  document.getElementById('petName').value=f.name||'';
+  document.getElementById('petSpecies').selectedIndex=f.species==='cat'?1:0;
+  document.getElementById('petBreed').value=f.breed||'';
+  document.getElementById('petBorn').value=f.born||'';
+  document.getElementById('petDied').value=f.died||'';
+  document.getElementById('petOneline').value=f.oneline||'';
+  document.getElementById('petStory').value=f.story||'';
+  document.querySelectorAll('#photoPick .pp').forEach(el=>el.classList.toggle('sel',el.dataset.k===(f.photoK||'shiba')));
+  document.querySelectorAll('#placeCards .radio-card').forEach((el,i)=>el.classList.toggle('sel',i===(f.placeIdx||0)));
+  document.querySelectorAll('#identityCards .radio-card').forEach(el=>el.classList.toggle('sel',el.dataset.id===(f.identity||'A1')));
+  document.querySelectorAll('#createToggles .sw').forEach((sw,i)=>sw.classList.toggle('on',(f.tog||[true,true,false,false])[i]));
+}
+function resetForm(){setForm({form:{name:'',species:'dog',breed:'',born:'',died:'',oneline:'',story:'',photoK:'shiba',placeIdx:0,identity:'A1',tog:[true,true,false,false]}});}
+function renderMyPets(){
+  const el=document.getElementById('myPetsList');if(!el)return;
+  const items=[].concat(ST.drafts.map(p=>({p,st:'draft'}))).concat(ST.pending.map(p=>({p,st:'pending'}))).concat(ST.userPets.map(p=>({p,st:'live'})));
+  const list=items.filter(x=>myFilter==='all'||x.st===myFilter);
+  if(!list.length){el.innerHTML=`<div class="mp-empty">還沒有${myFilter==='draft'?'草稿':myFilter==='pending'?'審核中的寵物':myFilter==='live'?'已上架的寵物':'寵物'}。</div>`;return;}
+  const LBL={draft:'草稿',pending:'審核中',live:'已上架'};
+  el.innerHTML=list.map(({p,st})=>{
+    let acts= st==='draft' ? `<div class="a2" onclick="editDraft('${p.id}')">編輯</div><div class="a2 del" onclick="deleteDraft('${p.id}')">刪</div>`
+      : st==='pending' ? `<div class="a2" onclick="go('admin')">查看審核</div>`
+      : `<div class="a2" onclick="openStory('${p.id}')">查看</div>`;
+    return `<div class="mprow"><div class="ava">${avaHTML(p.img,p.emoji)}</div>
+      <div class="b"><div class="nm">${p.name}<span class="mp-badge ${st}">${LBL[st]}</span></div>
+      <div class="meta">${p.breed} · ${p.range||''}</div></div>
+      <div class="acts">${acts}</div></div>`;
+  }).join('');
 }
 function idCheck(p){return p.identity==='A1'?['✓ 塔位合約已驗','ok']:p.identity==='A3'?['✓ 生前契約已驗','ok']:['⏳ 待人工（證明審核中）','wait'];}
 function renderPending(){
@@ -1302,9 +1380,10 @@ function renderPending(){
 function approvePet(id){const i=ST.pending.findIndex(p=>p.id===id);if(i<0)return;
   const p=ST.pending.splice(i,1)[0];ST.userPets.push(p);persist();
   publishPet(p);renderPending();renderCollect();
+  if(document.getElementById('myPetsList'))renderMyPets();
   toast('已通過並上架 · '+p.name+' 出現在地圖了 ✅');}
 function rejectPet(id){const i=ST.pending.findIndex(p=>p.id===id);if(i<0)return;
-  ST.pending.splice(i,1);persist();renderPending();toast('已退回，並通知主人補正');}
+  ST.pending.splice(i,1);persist();renderPending();if(document.getElementById('myPetsList'))renderMyPets();toast('已退回，並通知主人補正');}
 function publishPet(p){
   PETS[p.id]=p;if(!ONMAP.includes(p.id))ONMAP.push(p.id);DAILY[p.id]=DAILY[p.id]||{cap:60,base:0};
   if(typeof MAP!=='undefined'&&MAP&&CLUSTER){const st=mapState(p,p.id),tp=petType(p);
