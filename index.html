@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Pet Memory Map · 寵物記憶地圖 v1.0 Demo</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 <style>
   :root{
     --bg:#f6f1e7;--paper:#fffdf8;--ink:#3d362e;--ink-soft:#7c7267;--line:#e8ddca;
@@ -73,6 +76,9 @@
   .pin .pulse{position:absolute;top:0;left:0;width:50px;height:50px;border-radius:50%;background:var(--gold);opacity:.28;animation:pulse 2.4s infinite;z-index:-1;}
   @keyframes pulse{0%{transform:scale(.7);opacity:.35;}70%{transform:scale(1.8);opacity:0;}100%{opacity:0;}}
   .me-pin{width:16px;height:16px;border-radius:50%;background:#4c8bf5;border:3px solid #fff;box-shadow:0 0 0 4px rgba(76,139,245,.25);}
+  .cluster{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fdf3d8,#e6b95e);border:3px solid #fff;
+    box-shadow:var(--shadow);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#5a4413;}
+  .marker-cluster,.marker-cluster div{background:transparent!important;}
   .today-strip{padding:14px 16px 4px;}
   .today-strip h3{margin:0 0 3px;font-size:14px;font-weight:800;}
   .today-strip p{margin:0 0 12px;font-size:11.5px;color:var(--ink-soft);}
@@ -284,6 +290,14 @@
   .onsite .obtn:disabled{opacity:.6;}
   .onsite.revealed{background:#eef3e8;border-color:#d5e3c9;}
   .onsite .msg{font-size:12.5px;line-height:1.75;color:#4b4339;font-style:italic;}
+  /* 家族留言牆 */
+  .wall{max-height:230px;overflow-y:auto;margin:4px 0 12px;display:flex;flex-direction:column;gap:9px;}
+  .wall .wmsg{background:#f3f0f7;border:1px solid #ddd4e8;border-radius:13px;padding:10px 12px;}
+  .wall .wmsg .wwho{font-size:10.5px;font-weight:800;color:#7a6f9a;margin-bottom:3px;}
+  .wall .wmsg .wtext{font-size:12.5px;line-height:1.6;color:#4b4339;}
+  .wall .wempty{text-align:center;font-size:12px;color:var(--ink-soft);padding:16px 0;}
+  .wallinput{width:100%;border:1px solid var(--line);border-radius:13px;padding:11px;font-size:13px;font-family:inherit;resize:none;margin-bottom:10px;}
+  .wallinput:focus{outline:2px solid #ece7f2;border-color:#c4b6df;}
 
   /* ===== COLLECT ===== */
   .progress-hero{background:linear-gradient(150deg,#5f7d55,#7fa06f);color:#fff;border-radius:20px;padding:18px;margin:4px 0 8px;box-shadow:var(--shadow);}
@@ -796,7 +810,7 @@ const LOCKED={
 /* ---------- persistence（localStorage · 讓互動與解鎖跨重整保留） ---------- */
 const SKEY='pmm_v1';
 let ST=(()=>{try{return JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){return{}}})();
-['flowers','saves','mets','guardians','unlocked','tomb','viewsToday'].forEach(k=>ST[k]=ST[k]||{});
+['flowers','saves','mets','guardians','unlocked','tomb','viewsToday','famWall'].forEach(k=>ST[k]=ST[k]||{});
 if(!ST.role)ST.role='B';
 function persist(){try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}}
 
@@ -816,6 +830,20 @@ const MODEUI={
   living:{fIc:"🌟",fLb:"送祝福",sLb:"關注",mLb:"打招呼",mF:"🌟 收到的祝福",mM:"👋 打過招呼",mS:"🔖 被關注",fToast:"你為牠送上一份祝福 🌟",mToast:"你跟牠打了聲招呼 👋"},
   honor:{fIc:"🎖️",fLb:"致敬",sLb:"收藏",mLb:"已致意",mF:"🎖️ 收到的致敬",mM:"🫡 致意人次",mS:"🔖 被收藏",fToast:"你向牠致上敬意 🎖️",mToast:"已向這位夥伴致意 🫡"}
 };
+/* 家族留言牆預設訊息（L2 · 只有家人看得到） */
+const FAMSEED={
+  mochi:[{who:"太太",ago:"3 天前",text:"孩子今天問麻糬去哪了，我說牠在河邊曬太陽。"},{who:"我",ago:"上週",text:"經過第三張長椅，還是忍不住坐了一下。"}],
+  luna:[{who:"阿嬤",ago:"2 天前",text:"又想起牠跳上書桌陪讀的樣子了。"},{who:"哥哥",ago:"上週",text:"露娜，我考完試了，這次有進步。"}],
+  coco:[{who:"阿哲",ago:"5 天前",text:"放假回家，門口沒有你等我，還是有點不習慣。"}],
+  haru:[{who:"我",ago:"昨天",text:"今天帶小春去打預防針，牠超勇敢，只哀了一聲。"},{who:"妹妹",ago:"3 天前",text:"小春把我的拖鞋叼走了啦，可是好可愛捨不得罵。"}],
+  mianhua:[{who:"麵攤阿姨",ago:"上週",text:"下雨天還是會多留一碗飯在騎樓，習慣了。"}],
+  doudou:[{who:"陳大哥",ago:"4 天前",text:"今天在草地上放了一根樹枝，跟你說早安。"}],
+  juzi:[{who:"師傅",ago:"6 天前",text:"今天麵包出爐，門口的地墊空空的，有點想牠。"}],
+  mimi:[{who:"王爺爺",ago:"2 天前",text:"公園的石桌我還是每天去坐，手放在旁邊，像妳還在。"}],
+  charlie:[{who:"周先生",ago:"上週",text:"玫瑰開了，走到那我又回頭找你了。"}],
+  banban:[{who:"芝山鄰居",ago:"上週",text:"老樟樹下今天有人放了飼料，大家都還記得妳。"}]
+};
+function famMsgs(id){return (FAMSEED[id]||[]).concat(ST.famWall[id]||[]);}
 function resetProgress(){if(confirm('清除你在這個 demo 的所有互動與解鎖紀錄？')){localStorage.removeItem(SKEY);location.reload();}}
 
 /* 地圖上出現的三隻主角 + 收藏冊裡「先前已遇見」的寵物 */
@@ -920,7 +948,7 @@ function renderRoleView(id){
       <div class="prow"><div class="pk">🖼️</div><div class="pv"><b>家族相簿・影片</b> <span>· 24 張照片 / 3 支影片</span></div></div>
       <div class="prow"><div class="pk">💬</div><div class="pv"><b>家族留言牆</b><br><span>家人之間的悄悄話，不對外公開</span></div></div>
       <div class="prow"><div class="pk">📖</div><div class="pv"><b>完整生命故事</b> <span>· 已解鎖</span></div></div>
-      <button class="pbtn" onclick="toast('（Demo）在家族留言牆留言')" style="background:#7a6f5a">在家族留言牆留言</button></div>`;
+      <button class="pbtn" onclick="openFamWall('${id}')" style="background:#7a6f5a">💬 家族留言牆（${famMsgs(id).length}）</button></div>`;
   const ownerHTML=`<div class="pcard priv"><div class="ph4">🔒 主人專屬（L3 · 僅主帳號）</div>
       <div class="prow"><div class="pk">📔</div><div class="pv"><b>主人日記</b><br><span>寫給自己、連家人都不一定看的那一面</span></div></div>
       <div class="prow"><div class="pk">👣</div><div class="pv"><b>來訪名冊（詳細）</b><br><span>誰來過、誰送了花，一一為你留著</span></div></div>
@@ -999,6 +1027,24 @@ function walkToTomb(id){const btn=$('tombBtn');btn.disabled=true;btn.textContent
     num.textContent='距離塔位 '+(d>=1000?(d/1000).toFixed(1)+' km':Math.round(d)+' m');
   },110);
 }
+/* 家族留言牆（L2 · 只有家人看得到，可實際留言） */
+function wallListHTML(id){const ms=famMsgs(id);
+  if(!ms.length)return '<div class="wempty">還沒有家人留言，成為第一個對牠說話的人。</div>';
+  return ms.map(m=>`<div class="wmsg"><div class="wwho">${m.who} · ${m.ago||'剛剛'}</div><div class="wtext">${(m.text||'').replace(/</g,'&lt;')}</div></div>`).join('');
+}
+function openFamWall(id){const p=PETS[id];
+  $('sheet').innerHTML=`<div class="grip"></div>
+    <h3>👨‍👩‍👧 家族留言牆</h3><div class="stipe">${p.name} · 只有家人看得到</div>
+    <div class="wall" id="wallList">${wallListHTML(id)}</div>
+    <textarea class="wallinput" id="wallInput" rows="2" placeholder="寫下想對牠說的話…（只有家人看得到）"></textarea>
+    <button class="walkbtn" onclick="postFamMsg('${id}')">送出留言</button>`;
+  $('sheetMask').classList.add('show');
+  const wl=$('wallList');if(wl)wl.scrollTop=wl.scrollHeight;
+}
+function postFamMsg(id){const t=($('wallInput').value||'').trim();if(!t){toast('先寫點什麼吧');return;}
+  (ST.famWall[id]=ST.famWall[id]||[]).push({who:'你（家人）',ago:'剛剛',text:t});persist();
+  $('wallList').innerHTML=wallListHTML(id);$('wallInput').value='';
+  const wl=$('wallList');wl.scrollTop=wl.scrollHeight;toast('已留言到家族留言牆 💬');}
 function openRoleSheet(){
   if(cur&&PETS[cur].inst){toast('榮譽夥伴為公開紀念，無需切換身分');return;}
   $('sheet').innerHTML=`<div class="grip"></div>
@@ -1158,27 +1204,31 @@ function pinIcon(url,emoji,locked,dormant,type,stateBadge){
     html:`<div class="pin${locked?' locked':''}${dormant?' dormant':''}${t}">${(locked||dormant)?'':'<div class="pulse"></div>'}<div class="bubble">${avaHTML(url,emoji)}${locked?'<div class="lk">🔒</div>':''}</div>${corner}</div>`});
 }
 const ONMAP=['mochi','luna','coco','haru','brave','mianhua','doudou','juzi','mimi'];
+let CLUSTER;
 function initMap(){
   MAP=L.map('map',{zoomControl:false,scrollWheelZoom:false,attributionControl:true}).setView(ME,14);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(MAP);
   L.marker(ME,{icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],html:'<div class="me-pin"></div>'})}).addTo(MAP);
+  CLUSTER=L.markerClusterGroup({maxClusterRadius:48,showCoverageOnHover:false,spiderfyOnMaxZoom:true,
+    iconCreateFunction:c=>L.divIcon({className:'',iconSize:[42,42],iconAnchor:[21,21],html:`<div class="cluster">${c.getChildCount()}</div>`})});
   const bounds=[ME];
   // 所有寵物都在公開地圖（紀念 / 在世 / 榮譽 各有識別）
   ONMAP.forEach(id=>{const p=PETS[id];const sp=p.species||(p.emoji==='🐱'?'cat':'dog');const tp=petType(p);const st=mapState(p,id);
-    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false,!st.live,tp,st.badge)}).addTo(MAP).on('click',()=>openStory(id));
-    MARKERS.push({m,species:sp,today:st.live,id,type:tp});bounds.push(p.loc);});
+    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false,!st.live,tp,st.badge)}).on('click',()=>openStory(id));
+    CLUSTER.addLayer(m);MARKERS.push({m,species:sp,today:st.live,id,type:tp});bounds.push(p.loc);});
   // 未解鎖地點（走近才解鎖）
   Object.keys(LOCKED).forEach(key=>{const l=LOCKED[key],p=PETS[l.petId],un=!!ST.unlocked[key];
-    const m=L.marker(l.loc,{icon:pinIcon(un?p.img:l.img,un?p.emoji:l.emoji, un?!apStatus(p).active:true)}).addTo(MAP);
+    const m=L.marker(l.loc,{icon:pinIcon(un?p.img:l.img,un?p.emoji:l.emoji, un?!apStatus(p).active:true)});
     m.on('click',()=> un?openStory(l.petId):openLockSheet(key));
-    MARKERS.push({m,species:l.species,today:un,key,petId:l.petId,locked:true});MARKERS_MAP[key]=m;bounds.push(l.loc);});
+    CLUSTER.addLayer(m);MARKERS.push({m,species:l.species,today:un,key,petId:l.petId,locked:true});MARKERS_MAP[key]=m;bounds.push(l.loc);});
+  MAP.addLayer(CLUSTER);
   MAP.fitBounds(bounds,{padding:[42,42]});
 }
 function filterSpecies(el,kind){
   el.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');
   MARKERS.forEach(o=>{
     const show = kind==='all' ? true : kind==='today' ? o.today : o.species===kind;
-    if(show)o.m.addTo(MAP);else MAP.removeLayer(o.m);
+    if(show)CLUSTER.addLayer(o.m);else CLUSTER.removeLayer(o.m);
   });
 }
 /* ---------- render ---------- */
