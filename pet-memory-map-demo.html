@@ -155,6 +155,10 @@
   .mchip.on{background:var(--green-deep);color:#fff;}
   .mode-banner{font-size:11px;font-weight:700;color:var(--green-deep);background:#eef3e8;border:1px solid #d8e3cd;border-radius:11px;padding:8px 11px;margin-top:14px;line-height:1.5;}
   .mode-banner.kid{color:#a5741a;background:var(--gold-soft);border-color:var(--gold);}
+  /* 兒童版整頁：隱藏較沉重／技術性的區塊，文字放大一點 */
+  #s-story.kidmode #ownerSection,#s-story.kidmode .guardian-card,#s-story.kidmode .exposure{display:none;}
+  #s-story.kidmode .storybody p{font-size:14.5px;line-height:2;}
+  #s-story.kidmode .traits .tr .v{font-size:13px;}
   .timeline{border-left:2px solid var(--line);margin:4px 0 4px 6px;padding-left:2px;}
   .timeline .ti{position:relative;padding:0 0 14px 18px;}
   .timeline .ti::before{content:"";position:absolute;left:-7px;top:2px;width:11px;height:11px;border-radius:50%;background:var(--gold);border:2px solid var(--paper);}
@@ -484,8 +488,10 @@
           <div class="exposure" id="exposureInfo"></div>
           <div class="safety" id="placeSafety">✅ 公共場所 · 已通過安全檢查</div>
         </div>
+        <div id="ownerSection">
         <h4>💛 主人寄語 · <span id="storyOwnerName">—</span></h4>
         <p id="storyOwner">—</p>
+        </div>
         <div class="guardian-card">
           <div class="gtext"><b>🛡️ 成為 <span id="gName">牠</span> 的守護者</b><span class="gsub" id="gCount">目前 0 位守護者</span><span class="gdesc">守護者不是擁有，而是一個承諾：我會持續記得牠。（Demo · 不含付費）</span></div>
           <button class="gbtn" id="guardBtn" onclick="toggleGuardian()">成為守護者</button>
@@ -844,6 +850,20 @@ const FAMSEED={
   banban:[{who:"芝山鄰居",ago:"上週",text:"老樟樹下今天有人放了飼料，大家都還記得妳。"}]
 };
 function famMsgs(id){return (FAMSEED[id]||[]).concat(ST.famWall[id]||[]);}
+/* 兒童版整頁內容（§12.3：不用死亡嚇孩子、不過度悲情、強調記憶與陪伴） */
+const KID={
+  mochi:{q:"「快樂很簡單——一顆球、一片草地，還有你在身邊！」",like:"溫溫的地瓜、被摸下巴、早上第一道太陽，還有追球球。",habit:"每天早上叫主人起床，看到跑步的人就搖尾巴幫他們加油。",range:"最愛在河邊的大草地跑來跑去、曬太陽。",place:"河邊有一張長椅，是麻糬每天早上看太陽公公的地方。經過的話，也一起曬曬太陽吧！"},
+  luna:{q:"「牠一坐在那裡，大家的心情就變好了。」",like:"曬得暖暖的矮牆、紙箱，還有放學回家的小朋友。",habit:"每天傍晚坐在公園的矮牆上，看小朋友放學。",range:"最喜歡在福林公園的矮牆上巡邏、看大家回家。",place:"傍晚五點，露娜會坐在公園的矮牆上，看小朋友一個一個放學回家。"},
+  coco:{q:"「每次哥哥回家，牠都在門口開心地等。」",like:"草地上的風、追泡泡、把頭伸出車窗外。",habit:"一到公園就衝上高台看小鳥，聽到開飯聲音會飛奔過來。",range:"最愛在大草坪上跑步，風越大牠越開心。",place:"天母運動公園有一片大草坪，拿鐵最愛在這裡迎著風奔跑。"},
+  charlie:{q:"「牠的鼻子好厲害，什麼都找得到！」",like:"花園的青草味、追蝴蝶，還有把撿到的東西叼給爺爺看。",habit:"每天早上在大花園走一圈，幫大家找掉在地上的東西。",range:"最喜歡在士林官邸的花園裡散步、聞花香。",place:"士林官邸有一座漂亮的花園，查理每天早上都在這裡散步、追蝴蝶。"},
+  banban:{q:"「山上的每個人都很愛牠、輪流照顧牠。」",like:"大樹下的樹蔭、曬過太陽的石階，還有安靜聽大家說話。",habit:"每天坐在山上的大樹下，聽爬山的人和小朋友說話。",range:"最喜歡待在芝山岩的百年老樹下乘涼。",place:"芝山岩有一棵好大好大的老樹，斑斑最喜歡坐在樹下，聽大家說話。"},
+  haru:{q:"「牠現在健健康康的，是家裡最開心的小寶貝！」",like:"曬太陽、啃玩具骨頭、主人回家的那一刻，還有追自己的小尾巴。",habit:"聽到零食袋就用短短的腿狂奔，散步走一走會坐下要人抱。",range:"每天早上在前港公園的大草坪跑跳。",place:"前港公園有一片大草坪，小春每天早上都在這裡開心地跑跳。"},
+  brave:{q:"「牠是真正的英雄，用四隻腳保護大家！」",like:"出任務前的口令、找到目標的獎勵球，還有退休後睡飽飽的午覺。",habit:"鼻子好靈，會幫警察叔叔找到藏起來的東西，聽到警笛就豎起耳朵。",range:"在士林一帶服勤，退休後最愛在捷運站前廣場散步。",place:"捷運士林站前有一座廣場，勇士退休後常在這裡曬太陽、看大家來來去去。"},
+  mianhua:{q:"「整條夜市都是牠的家！」",like:"關東煮攤暖暖的熱氣、小魚乾，還有很多人摸摸牠的頭。",habit:"下雨就躲進大廟的屋簷下，夜市打烊後會巡一圈才睡覺。",range:"最喜歡在熱鬧的士林夜市裡散步。",place:"士林夜市有一座大廟，棉花最喜歡在廟的屋簷下躲雨、打盹。"},
+  doudou:{q:"「牠撿回來的樹枝，是每個一起流汗的早晨。」",like:"早上的風、比自己還長的樹枝，還有被稱讚「好棒」。",habit:"天還沒亮就準備出門，一定要撿一根樹枝回家。",range:"最愛在百齡河濱的草地上撿樹枝、跑步。",place:"百齡河濱有一片大草地，豆豆最愛在這裡撿比自己還長的樹枝！"},
+  juzi:{q:"「牠一坐在門口，生意就特別好！」",like:"剛烤好的麵包香、曬太陽的地墊，還有香香的麵包邊。",habit:"麵包一出爐就坐在店門口，好像在幫忙招呼客人。",range:"最喜歡待在麵包店門口和至善公園的樹下。",place:"至善公園旁有一家麵包店，橘子每天坐在門口，等香香的麵包出爐。"},
+  mimi:{q:"「牠陪爺爺十四年，是最好的家人。」",like:"爺爺的膝蓋、早上的陽光，還有溫溫的雞肉。",habit:"每天早上叫爺爺起床，陪爺爺去公園散步。",range:"最喜歡在天母公園陪爺爺曬太陽。",place:"天母公園有一組石桌椅，咪咪每天早上都陪爺爺在這裡曬太陽。"}
+};
 function resetProgress(){if(confirm('清除你在這個 demo 的所有互動與解鎖紀錄？')){localStorage.removeItem(SKEY);location.reload();}}
 
 /* 地圖上出現的三隻主角 + 收藏冊裡「先前已遇見」的寵物 */
@@ -1089,26 +1109,39 @@ function openStory(id){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
 }
 /* 真實／兒童版切換（§12.3 真實與改編須明確區分） */
-function setMode(m){mode=m;applyMode();}
+function setMode(m){mode=m;applyMode();renderTimeline(PETS[cur]);}
 function applyMode(){
-  const p=PETS[cur],kid=mode==='kid';
+  const p=PETS[cur],kid=mode==='kid',k=KID[cur]||{};
   $('mReal').classList.toggle('on',!kid);$('mKid').classList.toggle('on',kid);
+  document.getElementById('s-story').classList.toggle('kidmode',kid);
   const b=$('modeBanner');b.classList.toggle('kid',kid);
   b.textContent=kid?'🧸 兒童版改編 · 溫柔重述真實故事，不等於亡者本人（依內容規範）':'📖 真實生命故事 · 由主人親自提供';
   $('storyH4').textContent=kid?'🧸 給孩子的故事':'📖 牠與主人的故事';
   $('storyText').textContent=kid?(p.kid||p.text):p.text;
+  $('storyQuote').textContent=(kid&&k.q)?k.q:p.quote;
+  $('tLike').textContent=(kid&&k.like)?k.like:p.like;
+  $('tHabit').textContent=(kid&&k.habit)?k.habit:p.habit;
+  $('tRange').textContent=(kid&&k.range)?k.range:p.range;
+  $('placeDesc').textContent=(kid&&k.place)?k.place:p.placeDesc;
 }
 function renderTimeline(p){
   let rows;
+  const kid=mode==='kid', place=p.place.split(' · ')[0];
   if(p.living){
     rows=[
       [p.born, `來到你身邊，成為家人`],
       [p.born+1, `一起度過第一個生日`],
-      ['現在', `健康長大中 · 你正一點一點把回憶存下來`],
-      ['未來', `需要的那一天，可一鍵轉為公開紀念`]
+      ['現在', kid?`健康長大中，是家裡的開心果`:`健康長大中 · 你正一點一點把回憶存下來`],
+      ['未來', kid?`會一直是大家的好朋友`:`需要的那一天，可一鍵轉為公開紀念`]
+    ];
+  }else if(kid){
+    rows=[
+      [p.born, `來到這個世界`],
+      [p.born, `在 ${place} 認識了好多朋友`],
+      ['現在', `住進了大家的心裡，一直被記得`]
     ];
   }else{
-    const met=p.met+(ST.mets[cur]?1:0), place=p.place.split(' · ')[0];
+    const met=p.met+(ST.mets[cur]?1:0);
     rows=[
       [p.born, `來到這個世界`],
       [p.born, `在 ${place} 留下最初的記憶`],
