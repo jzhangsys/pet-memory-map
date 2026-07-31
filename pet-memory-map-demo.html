@@ -204,6 +204,12 @@
   .appear-line{font-size:11.5px;font-weight:700;margin-top:10px;padding:7px 10px;border-radius:10px;background:#fff;display:flex;align-items:center;gap:6px;}
   .appear-line.live{color:var(--green-deep);}
   .appear-line.rest{color:var(--ink-soft);}
+  .exposure{margin-top:10px;font-size:11px;font-weight:700;color:var(--ink-soft);background:#fff;border-radius:11px;padding:9px 11px;}
+  .exposure .exprow{display:flex;justify-content:space-between;align-items:center;}
+  .exposure .exprow b{color:var(--green-deep);}
+  .exposure .expbar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:6px;}
+  .exposure .expbar i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--gold));}
+  .exposure .expnote{font-weight:500;color:#a89e8d;margin-top:6px;line-height:1.5;}
   /* 使用者分級 · 身分列與私密面板 */
   .rolebar{display:flex;align-items:center;gap:8px;margin:14px 16px 0;padding:9px 12px;border:1px solid var(--line);border-radius:13px;background:#fff;cursor:pointer;font-size:12px;box-shadow:var(--shadow-sm);}
   .rolebar .ricon{font-size:16px;}
@@ -221,6 +227,7 @@
   .pcard .prow .pv b{font-weight:800;}
   .pcard .prow .pv span{color:var(--ink-soft);font-size:10.5px;}
   .pcard.priv{background:linear-gradient(160deg,#fbf6ea,#f4ede0);border-color:#ecdcc0;}
+  .pcard.fam{background:linear-gradient(160deg,#f3f0f7,#ece7f2);border-color:#ddd4e8;}
   .pcard.tomb{background:linear-gradient(160deg,#eef3f6,#e7eef1);border-color:#d3e0e6;}
   .pcard.preneed{background:linear-gradient(160deg,#eef3e8,#e6efdd);border-color:#d5e3c9;}
   .pcard.honor{background:linear-gradient(150deg,#3d362e,#5a4f41);border:none;color:#fff;}
@@ -460,6 +467,7 @@
           <div class="pn">📍 <span id="placeName">—</span></div>
           <div class="pd" id="placeDesc">—</div>
           <div class="appear-line" id="appearInfo"></div>
+          <div class="exposure" id="exposureInfo"></div>
           <div class="safety" id="placeSafety">✅ 公共場所 · 已通過安全檢查</div>
         </div>
         <h4>💛 主人寄語 · <span id="storyOwnerName">—</span></h4>
@@ -740,7 +748,7 @@ const LOCKED={
 /* ---------- persistence（localStorage · 讓互動與解鎖跨重整保留） ---------- */
 const SKEY='pmm_v1';
 let ST=(()=>{try{return JSON.parse(localStorage.getItem(SKEY))||{}}catch(e){return{}}})();
-['flowers','saves','mets','guardians','unlocked','tomb'].forEach(k=>ST[k]=ST[k]||{});
+['flowers','saves','mets','guardians','unlocked','tomb','viewsToday'].forEach(k=>ST[k]=ST[k]||{});
 if(!ST.role)ST.role='B';
 function persist(){try{localStorage.setItem(SKEY,JSON.stringify(ST))}catch(e){}}
 
@@ -749,10 +757,11 @@ const ROLES={
   A1:{icon:"🏛️",name:"安厝家人",tag:"摯親 · 塔位",desc:"真正的主人，且在念念會館租有塔位",owner:true,priv:true,tomb:true},
   A2:{icon:"💛",name:"摯親家人",tag:"摯親",desc:"真正的主人（未租塔位）",owner:true,priv:true},
   A3:{icon:"🌱",name:"生前守候",tag:"摯親 · 生前",desc:"真正的主人，簽有生前契約，寵物仍在世",owner:true,priv:true,preneed:true},
+  F :{icon:"👨‍👩‍👧",name:"家人",tag:"家族",desc:"這隻寵物的家人（非主帳號）· 可見家族層",family:true},
   B :{icon:"🤍",name:"守護者",tag:"動物摯友",desc:"沒有這隻寵物，因喜愛而來陪伴",owner:false},
   C :{icon:"🎖️",name:"榮譽夥伴",tag:"公共服務",desc:"機關的公共服務動物（警犬／導盲犬…）",inst:true}
 };
-const ROLE_ORDER=["A1","A2","A3","B","C"];
+const ROLE_ORDER=["A1","A2","A3","F","B","C"];
 /* 依寵物類型調整互動語彙：紀念→獻花、在世→祝福、榮譽→致敬 */
 const MODEUI={
   memorial:{fIc:"🌼",fLb:"送花",sLb:"收藏",mLb:"已遇見",mF:"🌼 收到的花",mM:"👣 遇見的人",mS:"🔖 被收藏",fToast:"你替牠獻上了一朵花 🌼",mToast:"已記錄「遇見」👣 主人會知道又有人記得牠"},
@@ -792,6 +801,20 @@ const pad2=h=>String(h).padStart(2,'0');
 function apStatus(p){if(!p||!p.appear)return{active:true};const a=p.appear;return{active:a.from<=SIMH&&SIMH<a.to};}
 function apRange(p){const a=p.appear;return a?`${a.label} ${pad2(a.from)}:00–${pad2(a.to)}:00`:'整日';}
 function slotName(h){return h<5?'深夜':h<11?'清晨':h<14?'中午':h<17?'午後':h<21?'傍晚':'深夜';}
+/* ---------- 每日輪替 + 每日曝光上限 (§10.3) ---------- */
+const DAY=Math.floor(Date.now()/86400000);
+const DAILY={mochi:{cap:80,base:41},luna:{cap:40,base:40},coco:{cap:30,base:12},haru:{cap:25,base:8},brave:{cap:400,base:210},charlie:{cap:25,base:9},banban:{cap:30,base:14}};
+if(ST.day!==DAY){ST.day=DAY;ST.viewsToday={};persist();}
+function inRotation(id){const i=ONMAP.indexOf(id);return i<0?true:(DAY%ONMAP.length)!==i;}
+function todayViews(id){return (DAILY[id]?DAILY[id].base:0)+((ST.viewsToday&&ST.viewsToday[id])||0);}
+function petCap(id){return DAILY[id]?DAILY[id].cap:9999;}
+function underCap(id){return todayViews(id)<petCap(id);}
+function mapState(p,id){
+  if(!inRotation(id))return{live:false,badge:'🛌',dot:'🛌 今日輪休'};
+  if(!underCap(id))return{live:false,badge:'🌙',dot:'🌙 今日已額滿'};
+  if(!apStatus(p).active)return{live:false,badge:'💤',dot:'💤 '+((p.appear&&p.appear.label)||'整日')+'出沒'};
+  return{live:true,badge:'',dot:'🟢 出沒中'};
+}
 function setSimTime(el,h){SIMH=h;updateTimeUI();}
 function updateTimeUI(){
   document.getElementById('clock').textContent=pad2(SIMH)+':00';
@@ -804,7 +827,9 @@ function refreshAppearance(){
   MARKERS.forEach(o=>{
     if(o.locked&&!ST.unlocked[o.key])return;           // 仍上鎖：保留鎖頭圖示
     const id=o.petId||o.id;const p=PETS[id];if(!p)return;
-    o.m.setIcon(pinIcon(p.img,p.emoji,false,!apStatus(p).active,o.type||petType(p)));
+    if(o.key){o.m.setIcon(pinIcon(p.img,p.emoji,false,!apStatus(p).active,o.type||petType(p)));return;}
+    const st=mapState(p,id);o.today=st.live;
+    o.m.setIcon(pinIcon(p.img,p.emoji,false,!st.live,o.type||petType(p),st.badge));
   });
   renderToday();renderNearby();
   if(cur&&document.getElementById('s-story').classList.contains('active'))setAppearInfo(cur);
@@ -813,6 +838,14 @@ function setAppearInfo(id){const p=PETS[id],el=document.getElementById('appearIn
   const st=apStatus(p);
   el.className='appear-line '+(st.active?'live':'rest');
   el.textContent=(st.active?'🟢 現在出沒中':'💤 現在不在這裡')+' · 通常在 '+apRange(p)+' 出沒';
+}
+function setExposureInfo(id){const el=$('exposureInfo');if(!el)return;const p=PETS[id];
+  if(p.inst){el.style.display='none';return;} el.style.display='';
+  const v=todayViews(id),c=petCap(id),rot=inRotation(id),pct=Math.min(100,Math.round(v/c*100));
+  const status=!rot?'🛌 今日輪休（每日輪替）':(v>=c?'🌙 今日已達曝光上限':'✅ 今日輪值中');
+  el.innerHTML=`<div class="exprow"><span>🔁 每日曝光上限</span><span><b>${v}/${c}</b> · ${status}</span></div>
+    <div class="expbar"><i style="width:${pct}%"></i></div>
+    <div class="expnote">主人可為牠設每日曝光上限與輪替，避免被過度打擾——這也是一種私密感的保護。</div>`;
 }
 function applyModeUI(p){const u=MODEUI[petType(p)];
   $('actFlower').querySelector('.ic').textContent=u.fIc;
@@ -824,7 +857,7 @@ function applyModeUI(p){const u=MODEUI[petType(p)];
 }
 function renderLayerMeter(p){const el=$('layerMeter');if(!el)return;
   if(p.inst){el.style.display='none';return;} el.style.display='flex';
-  const r=ROLES[ST.role], unlocked=(r&&r.owner)?4:2;
+  const r=ROLES[ST.role], unlocked=(r&&r.owner)?4:(r&&r.family)?3:2;
   const layers=[['🌍','公開層'],['📖','完整故事'],['👨‍👩‍👧','家族層'],['🔒','私密層']];
   el.innerHTML=layers.map((L,i)=>`<div class="lchip ${i<unlocked?'on':''}">${i<unlocked?L[0]:'🔒'} ${L[1]}</div>`).join('');
 }
@@ -840,12 +873,17 @@ function updateStoryBanner(p){const lb=$('livingBanner');const rOwner=ROLES[ST.r
 }
 function renderRoleView(id){
   const p=PETS[id];updateStoryBanner(p);
-  const privHTML=`<div class="pcard priv"><div class="ph4">🔒 私密陪伴（僅摯親可見）</div>
-      <div class="prow"><div class="pk">📔</div><div class="pv"><b>完整私密故事・主人日記</b><br><span>寫給自己與家人、不公開的那一面</span></div></div>
-      <div class="prow"><div class="pk">🖼️</div><div class="pv"><b>私人相簿・影片</b> <span>· 24 張照片 / 3 支影片</span></div></div>
+  const famHTML=`<div class="pcard fam"><div class="ph4">👨‍👩‍👧 家族層（L2 · 家人共享）</div>
+      <div class="prow"><div class="pk">🖼️</div><div class="pv"><b>家族相簿・影片</b> <span>· 24 張照片 / 3 支影片</span></div></div>
+      <div class="prow"><div class="pk">💬</div><div class="pv"><b>家族留言牆</b><br><span>家人之間的悄悄話，不對外公開</span></div></div>
+      <div class="prow"><div class="pk">📖</div><div class="pv"><b>完整生命故事</b> <span>· 已解鎖</span></div></div>
+      <button class="pbtn" onclick="toast('（Demo）在家族留言牆留言')" style="background:#7a6f5a">在家族留言牆留言</button></div>`;
+  const ownerHTML=`<div class="pcard priv"><div class="ph4">🔒 主人專屬（L3 · 僅主帳號）</div>
+      <div class="prow"><div class="pk">📔</div><div class="pv"><b>主人日記</b><br><span>寫給自己、連家人都不一定看的那一面</span></div></div>
       <div class="prow"><div class="pk">👣</div><div class="pv"><b>來訪名冊（詳細）</b><br><span>誰來過、誰送了花，一一為你留著</span></div></div>
       <div class="prow"><div class="pk">✏️</div><div class="pv"><b>編輯故事與公開範圍</b> <span>· 私人／家族／匿名公開／公開</span></div></div>
       <button class="pbtn" onclick="toast('（Demo）開啟編輯')">編輯這一頁記憶</button></div>`;
+  const famNoteHTML=`<div class="locknote"><span class="li">🔒</span><div><b>主人日記</b>與<b>編輯權</b>屬於 L3 私密層，只有主帳號能動。你以<b>家人</b>身分，能看家族相簿、在留言牆留言、讀完整故事。</div></div>`;
   const preneedHTML=`<div class="pcard preneed"><div class="ph4">🌱 生前守候（寵物仍在世）</div>
       <div class="prow"><div class="pk">🔏</div><div class="pv"><b>私密建檔中・尚未公開上地圖</b><br><span>先為還在身邊的牠慢慢建立檔案，只有你看得到</span></div></div>
       <div class="prow"><div class="pk">🎂</div><div class="pv"><b>生日／相伴週年紀念</b> <span>· 陪伴每一個現在</span></div></div>
@@ -874,7 +912,8 @@ function renderRoleView(id){
     <div class="rmain"><b>以「${r.name}」身分查看</b><div class="rd">${r.desc}</div></div>
     <span class="rswap">切換 ▾</span>`;
   let h='';
-  if(r.owner){ h+=privHTML; if(p.living)h+=preneedHTML; if(r.tomb)h+=tombHTML; }
+  if(r.owner){ h+=famHTML+ownerHTML; if(p.living)h+=preneedHTML; if(r.tomb)h+=tombHTML; }
+  else if(r.family){ h+=famHTML+famNoteHTML; }
   else { h+= p.living?livingPubHTML:guardHTML; }
   $('rolePanel').innerHTML=h;renderLayerMeter(p);
 }
@@ -951,7 +990,7 @@ function openStory(id){
   $('actSave').classList.toggle('done',!!ST.saves[id]);
   $('actMet').classList.toggle('done',!!ST.mets[id]);
   $('gName').textContent=p.name; updateGuardianUI(id,p);
-  setAppearInfo(id); renderRoleView(id);
+  setAppearInfo(id); setExposureInfo(id); renderRoleView(id);
   applyModeUI(p);
   document.getElementById('s-story').classList.toggle('living',!!p.living);
   $('placeSafety').style.display='';
@@ -1009,9 +1048,11 @@ function doFlower(){if(ST.flowers[cur])return;ST.flowers[cur]=true;persist();
 function doSave(){const on=!ST.saves[cur];if(on)ST.saves[cur]=true;else delete ST.saves[cur];persist();
   const v=PETS[cur].save+(on?1:0);$('ctSave').textContent=$('mSave').textContent=v;
   $('actSave').classList.toggle('done',on);renderCollect();toast(on?'已收藏到你的記憶冊 🔖':'已取消收藏');}
-function doMet(){if(ST.mets[cur])return;ST.mets[cur]=true;persist();
+function doMet(){if(ST.mets[cur])return;
+  if(!PETS[cur].inst&&!underCap(cur)){toast('這孩子今天已達曝光上限，明天再來遇見牠 🌙');return;}
+  ST.mets[cur]=true;ST.viewsToday[cur]=(ST.viewsToday[cur]||0)+1;persist();
   const v=PETS[cur].met+1;$('ctMet').textContent=v;$('mMet').textContent=v.toLocaleString();
-  $('actMet').classList.add('done');renderTimeline(PETS[cur]);renderCollect();
+  $('actMet').classList.add('done');renderTimeline(PETS[cur]);renderCollect();setExposureInfo(cur);refreshAppearance();
   toast(MODEUI[petType(PETS[cur])].mToast);}
 
 /* ---------- 接近解鎖（§10 出沒規則：接近後解鎖） ---------- */
@@ -1066,11 +1107,12 @@ function reviewDone(btn,msg){const card=btn.closest('.review-card');card.style.t
 /* ---------- map (Leaflet + OpenStreetMap · 台北市士林區) ---------- */
 let MAP,MARKERS=[],MARKERS_MAP={};
 function petType(p){return p.living?'living':p.inst?'honor':'memorial';}
-function pinIcon(url,emoji,locked,dormant,type){
+function pinIcon(url,emoji,locked,dormant,type,stateBadge){
   const t=(type&&type!=='memorial')?' '+type:'';
-  const badge=type==='living'?'<div class="tag">🌱</div>':type==='honor'?'<div class="tag">🎖️</div>':'';
+  const typeBadge=type==='living'?'<div class="tag">🌱</div>':type==='honor'?'<div class="tag">🎖️</div>':'';
+  const corner=locked?'':dormant?`<div class="zzz">${stateBadge||'💤'}</div>`:typeBadge;
   return L.divIcon({className:'',iconSize:[50,60],iconAnchor:[25,56],
-    html:`<div class="pin${locked?' locked':''}${dormant?' dormant':''}${t}">${(locked||dormant)?'':'<div class="pulse"></div>'}<div class="bubble">${avaHTML(url,emoji)}${locked?'<div class="lk">🔒</div>':''}</div>${dormant?'<div class="zzz">💤</div>':badge}</div>`});
+    html:`<div class="pin${locked?' locked':''}${dormant?' dormant':''}${t}">${(locked||dormant)?'':'<div class="pulse"></div>'}<div class="bubble">${avaHTML(url,emoji)}${locked?'<div class="lk">🔒</div>':''}</div>${corner}</div>`});
 }
 const ONMAP=['mochi','luna','coco','haru','brave'];
 function initMap(){
@@ -1079,9 +1121,9 @@ function initMap(){
   L.marker(ME,{icon:L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],html:'<div class="me-pin"></div>'})}).addTo(MAP);
   const bounds=[ME];
   // 所有寵物都在公開地圖（紀念 / 在世 / 榮譽 各有識別）
-  ONMAP.forEach(id=>{const p=PETS[id];const sp=p.species||(p.emoji==='🐱'?'cat':'dog');const tp=petType(p);
-    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false,!apStatus(p).active,tp)}).addTo(MAP).on('click',()=>openStory(id));
-    MARKERS.push({m,species:sp,today:true,id,type:tp});bounds.push(p.loc);});
+  ONMAP.forEach(id=>{const p=PETS[id];const sp=p.species||(p.emoji==='🐱'?'cat':'dog');const tp=petType(p);const st=mapState(p,id);
+    const m=L.marker(p.loc,{icon:pinIcon(p.img,p.emoji,false,!st.live,tp,st.badge)}).addTo(MAP).on('click',()=>openStory(id));
+    MARKERS.push({m,species:sp,today:st.live,id,type:tp});bounds.push(p.loc);});
   // 未解鎖地點（走近才解鎖）
   Object.keys(LOCKED).forEach(key=>{const l=LOCKED[key],p=PETS[l.petId],un=!!ST.unlocked[key];
     const m=L.marker(l.loc,{icon:pinIcon(un?p.img:l.img,un?p.emoji:l.emoji, un?!apStatus(p).active:true)}).addTo(MAP);
@@ -1101,16 +1143,16 @@ function fillDataImg(){document.querySelectorAll('[data-img]').forEach(el=>{
   el.innerHTML=avaHTML(IMG[el.dataset.img],el.dataset.fb);});}
 function renderToday(){
   const box=document.getElementById('todayCards');
-  const items=["brave","luna","haru","mochi","coco"].map(id=>({id,active:apStatus(PETS[id]).active}));
-  items.sort((a,b)=>(b.active?1:0)-(a.active?1:0));
-  const liveN=items.filter(x=>x.active).length;
+  const items=["brave","luna","haru","mochi","coco"].map(id=>({id,st:mapState(PETS[id],id)}));
+  items.sort((a,b)=>(b.st.live?1:0)-(a.st.live?1:0));
+  const liveN=items.filter(x=>x.st.live).length;
   const sub=document.getElementById('tsSub');
-  if(sub)sub.textContent=liveN?`此刻有 ${liveN} 隻正在附近出沒`:'此刻沒有寵物出沒，換個時段看看 🕘';
-  box.innerHTML=items.map(({id,active})=>{const p=PETS[id];return `
-    <div class="petcard${active?'':' resting'}" onclick="openStory('${id}')">
+  if(sub)sub.textContent=liveN?`此刻有 ${liveN} 隻正在附近出沒 · 每日輪替中`:'此刻沒有寵物出沒，換個時段看看 🕘';
+  box.innerHTML=items.map(({id,st})=>{const p=PETS[id];return `
+    <div class="petcard${st.live?'':' resting'}" onclick="openStory('${id}')">
       <div class="top ph">${avaHTML(p.img,p.emoji)}
         <div class="dist">📍 ${p.dist}</div>
-        <div class="stbadge ${active?'live':'rest'}">${active?'✨ 出沒中':'💤 '+p.appear.label+'出沒'}</div></div>
+        <div class="stbadge ${st.live?'live':'rest'}">${st.dot}</div></div>
       <div class="info"><div class="nm">${p.name}</div><div class="sp">${p.place.split(' · ')[0]}</div>
       <div class="hint">「${p.quote.slice(1,16)}…」</div></div></div>`;}).join('');
 }
@@ -1125,12 +1167,12 @@ function renderNearby(){
         <div class="body"><div class="nm">🔒 尚未解鎖</div><div class="meta">${l.species==='dog'?'米格魯':'虎斑貓'} · 需走近解鎖</div>
         <div class="place">📍 ${l.name} · 走到附近即可遇見</div></div>
         <div class="rt"><div class="d">${l.dist}</div></div></div>`;}
-    const p=PETS[r.id],st=apStatus(p);
+    const p=PETS[r.id],st=mapState(p,r.id);
     return `<div class="listrow" onclick="openStory('${r.id}')">
       <div class="ava">${avaHTML(p.img,p.emoji)}</div>
       <div class="body"><div class="nm">${p.name}</div><div class="meta">${p.sub.split(' · ').slice(0,2).join(' · ')}</div>
       <div class="place">📍 ${p.place.split(' · ')[0]}</div>
-      <div class="stdot ${st.active?'live':'rest'}">${st.active?'🟢 出沒中':'💤 '+apRange(p)}</div></div>
+      <div class="stdot ${st.live?'live':'rest'}">${st.dot}</div></div>
       <div class="rt"><div class="d">${p.dist}</div><div class="fl">${MODEUI[petType(p)].fIc} ${p.flower+(ST.flowers[r.id]?1:0)}</div></div></div>`;
   }).join('');
 }
